@@ -61,6 +61,6 @@ class ContainerUnderTest extends Container
 {
     public static function setInstance($instance)
     {
-        self::$instance = $instance;
+        static::$instance = $instance;
     }
 }

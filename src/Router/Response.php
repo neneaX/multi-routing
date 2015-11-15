@@ -16,7 +16,7 @@ class Response
      */
     protected $statusCode;
 
-    public function __construct($content = '', $status = 200, $headers = array())
+    public function __construct($content = '', $status = 200, array $headers = [])
     {
         $this->setContent($content);
         $this->setStatusCode($status);
@@ -68,5 +68,7 @@ class Response
     {
         $this->sendHeaders();
         $this->sendContent();
+
+        return $this;
     }
 }

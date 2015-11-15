@@ -58,15 +58,12 @@ class JsonParser
     public function getCalledParams()
     {
         $this->validateRequest();
-        $params = [];
 
-        if (is_array($this->request->params) || is_object($this->request->params)) {
-            foreach ($this->request->params as $key => $value) {
-                $params[$key] = $value;
-            }
+        if (!isset($this->request->params)) {
+            return [];
         }
 
-        return $params;
+        return is_array($this->request->params) ? $this->request->params : get_object_vars($this->request->params);
     }
 
     /**
@@ -78,13 +75,13 @@ class JsonParser
      */
     public function getCalledParam($name)
     {
-        $this->validateRequest();
-    
-        if (!array_key_exists($name, $this->request->params)) {
+        $params = $this->getCalledParams();
+
+        if (!array_key_exists($name, $params)) {
             return null;
         }
         
-        return $this->request->params[$name];
+        return $params[$name];
     }
 
     /**

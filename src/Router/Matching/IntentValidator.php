@@ -35,9 +35,10 @@ class IntentValidator implements Validator
     }
     
     /**
-     * 
      * @param Route $route
-     * @param string $requestIntent
+     * @param       $requestIntent
+     *
+     * @return bool
      */
     protected function verifies(Route $route, $requestIntent)
     {
@@ -49,7 +50,6 @@ class IntentValidator implements Validator
         }
         $intent = str_replace('/', '\/', $intent);
         $requestIntent = addslashes($requestIntent);
-        
         preg_match('/' . $intent . '/', $requestIntent, $matches);
         
         if (!empty($matches)) {

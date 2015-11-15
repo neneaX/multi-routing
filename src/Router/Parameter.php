@@ -4,15 +4,12 @@ namespace MultiRouting\Router;
 
 class Parameter
 {
-    
     /**
-     * 
      * @var string
      */
     protected $name;
     
     /**
-     * 
      * @var string
      */
     protected $value;
@@ -42,5 +39,4 @@ class Parameter
     {
         $this->value = $value;
     }
-    
 }

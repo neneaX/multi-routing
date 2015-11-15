@@ -75,7 +75,19 @@ class Url
     protected function parseRaw()
     {
         preg_match('/^[\/]?([a-z]*)?\/([0-9].[0-9])(\/.*)/', $this->raw, $parsedUrl);
-        
+
+        // prepare URL component structure
+        $parsedUrl = is_array($parsedUrl) ? $parsedUrl : [];
+
+        $array_key_value = function ($key, $array, $valueIfNotFound = null) {
+            return array_key_exists($key, $array) ? $array[$key] : $valueIfNotFound;
+        };
+
+        $parsedUrl[1] = $array_key_value(1, $parsedUrl);
+        $parsedUrl[2] = $array_key_value(2, $parsedUrl);
+        $parsedUrl[3] = $array_key_value(3, $parsedUrl);
+
+        // check URL component available set values
         try {
             $this->setSerialization($parsedUrl[1]);
         } catch (SerializationException $e) {
@@ -160,18 +172,16 @@ class Url
             throw new VersionException('Invalid requested version: ' . $version);
         }
     }
-    
+
     /**
-     * 
      * @return string
      */
     public function getResourceUrl()
     {
         return $this->resourceUrl;
     }
-    
+
     /**
-     * 
      * @param string $resourceUrl
      * @throws ResourceUrlException
      */
@@ -183,15 +193,20 @@ class Url
             throw new ResourceUrlException('The requested resource URL is invalid.', 400, $e);
         }
     }
-    
+
     /**
+     * @note Improvement needed. (This returns value, where filterVersion doesn't.)
      *
      * @param string $resourceUrl
+     * @throws ResourceUrlException
      * @return string
      */
     protected function filterResourceUrl($resourceUrl)
     {
+        if ('' === $resourceUrl) {
+            throw new ResourceUrlException('The requested resource URL is empty.', 400);
+        }
+
         return $resourceUrl;
     }
-    
 }

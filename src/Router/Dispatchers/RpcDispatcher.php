@@ -9,11 +9,12 @@ use IoC\Container as IoC;
 
 class RpcDispatcher implements Dispatcher
 {
-    
     /**
-     *
-     * @param Route $route
+     * @param Route   $route
      * @param Request $request
+     *
+     * @return string
+     * @throws \Exception
      */
     public function dispatch(Route $route, Request $request)
     {
@@ -53,7 +54,7 @@ class RpcDispatcher implements Dispatcher
             try {
                 $Middleware = $this->getMiddleware($class);
             } catch (\Exception $e) {
-                throw new \Exception('Invalid Middleware' . $e->getMessage());
+                throw new \Exception('Invalid Middleware: ' . $e->getMessage());
             }
 
             try {

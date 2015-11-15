@@ -3,16 +3,13 @@ namespace MultiRouting\Router\Request\Handlers;
 
 class SoapHandler implements Handler
 {
-
     /**
-     *
      * @var object
      */
     protected $controller;
 
     /**
-     *
-     * @param object $controller            
+     * @param object $controller
      */
     public function __construct($controller)
     {
@@ -20,23 +17,23 @@ class SoapHandler implements Handler
     }
 
     /**
-     *
-     * @param string $method            
-     * @param array $params            
+     * @param string $method
+     * @param array $params
      * @return mixed
      */
-    public function __call($method, $params)
+    public function __call($method, array $params = [])
     {
+        $params = $params[0];
+
         if ($method != 'login') {
-            // remove the sessionId
-            unset($params[0]);
+            array_shift($params); // remove the sessionId
+            /** @note are the keys ordered ok? */
         }
-        
-        $response = call_user_func_array([
-            $this->controller,
-            $method
-        ], $params);
-        
+
+        /** @todo add some protection (method exists) */
+        $response = call_user_func_array([$this->controller, $method], $params);
+
+        /** @note this is different than other handler responses */
         return $response;
     }
 }

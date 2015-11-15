@@ -21,7 +21,7 @@ class WsdlParser
     /**
      * Set the path to server WSDL
      *
-     * @param string $path            
+     * @param string $path
      * @throws \Exception
      */
     public function setWsdl($path)
@@ -38,13 +38,17 @@ class WsdlParser
      */
     public function getRequestString()
     {
+        if (!$this->request instanceof \DOMDocument) {
+            return '';
+        }
+
         return $this->request->saveXML();
     }
 
     /**
      * Set the request object
      *
-     * @param mixed $request            
+     * @param mixed $request
      */
     public function setRequest($request)
     {
@@ -101,9 +105,11 @@ class WsdlParser
         $this->validateRequest();
         
         $bodyNodeList = $this->request->getElementsByTagName('Body');
+
         foreach ($bodyNodeList as $bodyNode) {
             // get elements with namespaces
             $methodNode = $bodyNode->firstChild;
+
             if ($methodNode && $methodNode instanceof \DOMElement) {
                 $methodNameParts = explode(':', $methodNode->nodeName);
                 return end($methodNameParts);
@@ -116,8 +122,8 @@ class WsdlParser
     /**
      * Get all the parameters from the called method (from the request)
      *
-     * @param string $name            
      * @return array
+     * @throws \Exception
      */
     public function getCalledParams()
     {
@@ -132,7 +138,8 @@ class WsdlParser
             if ($methodNode && $methodNode instanceof \DOMElement) {
                 foreach ($methodNode->childNodes as $paramNode) {
                     if ($paramNode && $paramNode instanceof \DOMElement) {
-                        $params[$paramNode->nodeName] = $paramNode->nodeValue;
+                        $parameterNameParts = explode(':', $paramNode->nodeName);
+                        $params[end($parameterNameParts)] = $paramNode->nodeValue;
                     }
                 }
             }
@@ -144,26 +151,15 @@ class WsdlParser
     /**
      * Get a specific parameter from the called method (from the request)
      *
-     * @param string $name            
+     * @param string $name
      * @return multitype:string|null
      */
     public function getCalledParam($name)
     {
-        $this->validateRequest();
-        
-        $bodyNodeList = $this->request->getElementsByTagName('Body');
-        foreach ($bodyNodeList as $bodyNode) {
-            // get elements with namespaces
-            $methodNode = $bodyNode->firstChild;
-            if ($methodNode && $methodNode instanceof \DOMElement) {
-                foreach ($methodNode->childNodes as $paramNode) {
-                    if ($paramNode && $paramNode instanceof \DOMElement) {
-                        if ($paramNode->nodeName == $name) {
-                            return $paramNode->nodeValue;
-                        }
-                    }
-                }
-            }
+        $params = $this->getCalledParams();
+
+        if (array_key_exists($name, $params)) {
+            return $params[$name];
         }
         
         return null;
@@ -177,7 +173,7 @@ class WsdlParser
     public function removeParam($name)
     {
         $this->validateRequest();
-        $oldRequest = $this->request->saveXML();
+        // $oldRequest = $this->request->saveXML();
         
         $bodyNodeList = $this->request->getElementsByTagName('Body');
         foreach ($bodyNodeList as $bodyNode) {
@@ -186,7 +182,9 @@ class WsdlParser
             if ($methodNode && $methodNode instanceof \DOMElement) {
                 foreach ($methodNode->childNodes as $paramNode) {
                     if ($paramNode && $paramNode instanceof \DOMElement) {
-                        if ($paramNode->nodeName == $name) {
+                        $nodeNameParts = explode(':', $paramNode->nodeName); // namespace fix
+
+                        if (end($nodeNameParts) == $name) {
                             $methodNode->removeChild($paramNode);
                             return true;
                         }
@@ -200,26 +198,36 @@ class WsdlParser
     /**
      * Validate if a specific method exists in the server WSDL
      *
-     * @param string $methodName            
-     * @throws \InvalidArgumentException
-     * @throws \Exception
+     * @param string $calledMethodName when not set, will check the method called in the request
+     *
+     * @throws \Exception when method is not found.
+     *
+     * @return null
      */
-    public function validateMethodExists($methodName)
+    public function validateMethodExists($calledMethodName = '')
     {
         $this->validateWsdl();
         $this->validateRequest();
-        
-        if (empty($methodName)) {
-            throw new \InvalidArgumentException('Invalid method');
+
+        if (empty($calledMethodName)) {
+            $calledMethodName = $this->getCalledMethod();
         }
-        $methodNames = [];
+
+        // get defined methods in WSDL file
+        $availableMethodNames = [];
         $xmlCargo = simplexml_load_file($this->wsdl);
-        for ($i = 0; $i < count($xmlCargo->portType->operation); $i ++) {
+        $availableMethodCount = count($xmlCargo->portType->operation);
+
+        for ($i = 0; $i < $availableMethodCount; $i++) {
             $node = $xmlCargo->portType->operation[$i];
-            $methodNames[] = trim((string) $node->attributes()->name);
+            $nodeMethodName = trim((string)$node->attributes()->name);
+
+            $parts = explode(':', $nodeMethodName); // namespaced operation names
+            $availableMethodNames[] = end($parts);
         }
-        
-        if (! in_array($methodName, $methodNames)) {
+
+        // if requested method doesn't exist then throw exception.
+        if (!in_array($calledMethodName, $availableMethodNames)) {
             throw new \Exception('Method does not exists in WSDL');
         }
     }
@@ -227,23 +235,25 @@ class WsdlParser
     /**
      * Set the request object from a parsed XML (string)
      *
-     * @param string $request            
+     * @param string $request
      * @throws \Exception
      */
     protected function setRequestFromString($request)
     {
         $DOM = new \DOMDocument('1.0', 'UTF-8');
         $DOM->preserveWhiteSpace = false;
-        $status = $DOM->loadXML($request);
-        
-        if (! $status) {
-            // try to convert to utf-8
-            $request = iconv('iso-8859-1', 'utf-8', $request);
-            $status = $DOM->loadXML($request);
-        }
-        if (! $status) {
-            throw new \Exception('String is not valid DOM.');
-        }
+
+        /* $status = */ $DOM->loadXML($request);
+
+//        if (! $status) {
+//            // try to convert to utf-8
+//            $request = iconv('iso-8859-1', 'utf-8', $request);
+//            $status = $DOM->loadXML($request);
+//        }
+
+//        if (!$status) {
+//            throw new \Exception('String is not valid DOM.');
+//        }
         
         $this->request = $DOM;
     }

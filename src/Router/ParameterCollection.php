@@ -3,38 +3,32 @@ namespace MultiRouting\Router;
 
 class ParameterCollection implements \Iterator, \Countable
 {
-
     /**
      * All the parameters
      *
      * @var array
      */
-    protected $parameters = array();
+    protected $parameters = [];
     
     /**
-     * 
      * @param array $parameters
      */
-    public function __construct(array $parameters = null)
+    public function __construct(array $parameters = [])
     {
-        if (!is_null($parameters)) {
-            foreach ($parameters as $name => $value) {
-                $this->add(new Parameter($name, $value));
-            }
+        foreach ($parameters as $name => $value) {
+            $this->add(new Parameter($name, $value));
         }
     }
     
     /**
-     *
-     * @param Parameter $Parameter            
+     * @param Parameter $parameter
      */
-    public function add(Parameter $Parameter)
+    public function add(Parameter $parameter)
     {
-        $this->parameters[$Parameter->getName()] = $Parameter;
+        $this->parameters[$parameter->getName()] = $parameter;
     }
     
     /**
-     * 
      * @param string $name
      * @throws \Exception
      * @return Parameter
@@ -72,5 +66,4 @@ class ParameterCollection implements \Iterator, \Countable
             return $parameter->getValue();
         }, $this->parameters);
     }
-    
 }

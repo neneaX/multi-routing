@@ -9,13 +9,12 @@ use IoC\Container as IoC;
 
 class SoapDispatcher implements Dispatcher
 {
-    public function __construct()
-    {
-    }
-
     /**
-     * @param Route $route
+     * @param Route   $route
      * @param Request $request
+     *
+     * @return mixed
+     * @throws \Exception
      */
     public function dispatch(Route $route, Request $request)
     {
@@ -49,13 +48,13 @@ class SoapDispatcher implements Dispatcher
             try {
                 $Middleware = $this->getMiddleware($class);
             } catch (\Exception $e) {
-                throw new \Exception('Invalid Middleware' . $e->getMessage());
+                throw new \Exception('Invalid Middleware: ' . $e->getMessage());
             }
 
             try {
                 $Middleware->handle($route, $request);
             } catch (\Exception $e) {
-                throw new \Exception('Request could not be handled by Middleware: ' . $e->getMessage());
+                throw new \Exception('Request could not be handled by Middleware ' . $class . ': ' . $e->getMessage());
             }
         }
     }
@@ -93,27 +92,28 @@ class SoapDispatcher implements Dispatcher
     }
 
     /**
-     *
      * @param Route $route
      * @param Request $request
      * @throws \Exception
-     * @return mixed
      */
     protected function runRoute(Route $route, Request $request)
     {
-        
         $action = $route->getAction();
         $controller = $this->getController($action);
-        $method = $this->getMethod($action);
+        // $method = $this->getMethod($action);
         $handler = $this->getRequestHandler($controller);
         
         $wsdl = $this->getWsdlPath();
+        $options = ['cache_wsdl' => 0];
 
-        $options = array('cache_wsdl' => 0);
-        $soapServer = new \SoapServer($wsdl);
+        $soapServer = $this->createServer($wsdl, $options);
         $soapServer->setObject($handler);
-        
-        return $soapServer->handle(); 
+        $soapServer->handle();
+    }
+
+    protected function createServer($wsdl, array $options = [])
+    {
+        return new \SoapServer($wsdl, $options);
     }
     
     /**
@@ -122,7 +122,7 @@ class SoapDispatcher implements Dispatcher
      */
     protected function getWsdlPath()
     {
-        return WSDL_PATH;
+        return \WSDL_PATH;
     }
     
     /**

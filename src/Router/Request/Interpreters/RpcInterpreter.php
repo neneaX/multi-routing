@@ -35,9 +35,9 @@ class RpcInterpreter implements Interpreter
     public function getIntent(Request $request)
     {
         $this->JsonParser->setRequest($request->getContent());
-        
+
         $calledMethod = $this->JsonParser->getCalledMethod();
-        
+
         return new Intent($calledMethod);
     }
 
@@ -56,7 +56,7 @@ class RpcInterpreter implements Interpreter
         
         if ($calledMethod != 'login') {
             // remove the sessionId
-            unset($calledMethodParams[0]);
+            array_shift($calledMethodParams);
         }
         
         return new ParameterCollection($calledMethodParams);
@@ -76,7 +76,7 @@ class RpcInterpreter implements Interpreter
         
         if ($calledMethod != 'login') {
             // return the sessionId
-            return $calledMethodParams[0];
+            return array_shift($calledMethodParams);
         }
         
         return null;

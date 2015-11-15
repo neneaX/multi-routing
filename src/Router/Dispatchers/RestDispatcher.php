@@ -9,11 +9,12 @@ use IoC\Container as IoC;
 
 class RestDispatcher implements Dispatcher
 {
-
     /**
+     * @param Route   $route
+     * @param Request $request
      *
-     * @param Route $route            
-     * @param Request $request            
+     * @return string
+     * @throws \Exception
      */
     public function dispatch(Route $route, Request $request)
     {
@@ -53,7 +54,7 @@ class RestDispatcher implements Dispatcher
             try {
                 $Middleware = $this->getMiddleware($class);
             } catch (\Exception $e) {
-                throw new \Exception('Invalid Middleware' . $e->getMessage());
+                throw new \Exception('Invalid Middleware: ' . $e->getMessage());
             }
             
             try {
@@ -65,6 +66,7 @@ class RestDispatcher implements Dispatcher
     }
 
     /**
+     * Returns the stored controller for this rest action.
      *
      * @throws \Exception
      * @return mixed
@@ -72,10 +74,9 @@ class RestDispatcher implements Dispatcher
     protected function getController($action)
     {
         list ($class, $method) = explode('@', $action);
-        
-        if (! method_exists($controller = IoC::getInstance()->resolve($class, [
-            'rpc'
-        ]), $method)) {
+        $controller = IoC::getInstance()->resolve($class, ['rest']);
+
+        if (!method_exists($controller, $method)) {
             throw new \Exception('Method Not Found');
         }
         
@@ -83,6 +84,7 @@ class RestDispatcher implements Dispatcher
     }
 
     /**
+     * Returns the method name component in the given action.
      *
      * @throws \Exception
      * @return string
@@ -90,10 +92,9 @@ class RestDispatcher implements Dispatcher
     protected function getMethod($action)
     {
         list ($class, $method) = explode('@', $action);
-        
-        if (! method_exists(IoC::getInstance()->resolve($class, [
-            'rpc'
-        ]), $method)) {
+        $controller = IoC::getInstance()->resolve($class, ['rest']);
+
+        if (! method_exists($controller, $method)) {
             throw new \Exception('Method Not Found');
         }
         
@@ -101,9 +102,8 @@ class RestDispatcher implements Dispatcher
     }
 
     /**
-     *
-     * @param Route $route            
-     * @param Request $request            
+     * @param Route $route
+     * @param Request $request
      * @return string
      */
     protected function runRoute(Route $route, Request $request)
@@ -112,7 +112,7 @@ class RestDispatcher implements Dispatcher
         $controller = $this->getController($action);
         $method = $this->getMethod($action);
         $handler = $this->getRequestHandler($controller);
-        
+
         return call_user_func_array([
             $handler,
             $method

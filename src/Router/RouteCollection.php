@@ -8,7 +8,7 @@ class RouteCollection implements \Iterator, \Countable
      * 
      * @var array
      */
-    protected $routes = array();
+    protected $routes = [];
     
     /**
      * 
@@ -18,12 +18,13 @@ class RouteCollection implements \Iterator, \Countable
     {
         $this->routes[$route->getHttpMethod()][$route->getIntent()][$route->getSerialization()] = $route;
     }
-    
+
     /**
-     * 
-     * @param string $httpMethod
-     * @param string $action
-     * @param string $serialization
+     * @param $httpMethod
+     * @param $intent
+     * @param $serialization
+     *
+     * @return mixed
      * @throws \Exception
      */
     public function get($httpMethod, $intent, $serialization)

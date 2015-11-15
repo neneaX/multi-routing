@@ -65,7 +65,7 @@ class Route
      */
     protected $parameters;
 
-    public function __construct($serialization, $httpMethod, $intent, $action, $matching, $middleware = array())
+    public function __construct($serialization, $httpMethod, $intent, $action, $matching, $middleware = [])
     {
         $this->setSerialization($serialization);
         $this->setHttpMethod($httpMethod);
@@ -166,12 +166,12 @@ class Route
     {
         $this->middleware = $middleware;
     }
-    
+
     public function getSessionId()
     {
         return $this->sessionId;
     }
-    
+
     /**
      * 
      * @return ParameterCollection
@@ -180,7 +180,7 @@ class Route
     {
         return $this->parameters;
     }
-    
+
     /**
      * 
      * @param Request $request
@@ -196,15 +196,16 @@ class Route
         
         return $this;
     }
-    
+
     protected function bindSessionId(RequestInterpreter $requestInterpreter, Request $request)
     {
         return $this->sessionId = $requestInterpreter->getSessionId($request);
     }
-    
+
     /**
-     * 
-     * @param Request $request
+     * @param RequestInterpreter $requestInterpreter
+     * @param Request            $request
+     *
      * @return ParameterCollection
      */
     protected function bindParameters(RequestInterpreter $requestInterpreter, Request $request)
@@ -214,7 +215,7 @@ class Route
 
     /**
      *
-     * @param Request $request            
+     * @param Request $request
      * @return boolean
      */
     public function matches(Request $request)

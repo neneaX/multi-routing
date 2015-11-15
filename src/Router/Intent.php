@@ -4,9 +4,7 @@ namespace MultiRouting\Router;
 
 class Intent
 {
-    
     /**
-     * 
      * @var string
      */
     protected $value;
@@ -25,5 +23,4 @@ class Intent
     {
         $this->value = $value;
     }
-    
 }

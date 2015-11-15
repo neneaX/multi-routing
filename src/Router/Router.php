@@ -73,14 +73,16 @@ class Router
     }
 
     /**
+     * @param string $serialization
+     * @param string $httpMethod
+     * @param        $intent
+     * @param        $action
+     * @param array  $matching
+     * @param array  $middleware
      *
-     * @param string $serialization            
-     * @param string $httpMethod            
-     * @param Request $request            
-     * @param string $action            
      * @return Route
      */
-    public function addRoute($serialization = 'rpc', $httpMethod = 'get', $intent, $action, $matching = array(), $middleware = array())
+    public function addRoute($serialization = 'rpc', $httpMethod = 'get', $intent, $action, array $matching = [], $middleware = array())
     {
         $Route = $this->createRoute($serialization, $httpMethod, $intent, $action, $matching, $middleware);
         
@@ -166,8 +168,9 @@ class Router
     }
 
     /**
+     * @param Request $request
      *
-     * @param Request $request            
+     * @return null|string
      */
     protected function beforeFilter(Request $request)
     {
@@ -228,28 +231,32 @@ class Router
     }
 
     /**
-     *
-     * @param string $serialization            
-     * @param Closure $callback            
+     * @param          $params
+     * @param \Closure $callback
      */
     public static function group($params, \Closure $callback)
     {
+        // detect serialization
         if (isset($params['serialization'])) {
             $serialization = $params['serialization'];
+
         } else {
             $serialization = static::DEFAULT_SERIALIZATION;
         }
-        
+
+        // detect middleware
         if (isset($params['middleware'])) {
             if (! is_array($params['middleware'])) {
-                $middleware = array(
+                $middleware = [
                     $params['middleware']
-                );
+                ];
+
             } else {
                 $middleware = $params['middleware'];
             }
+
         } else {
-            $middleware = array();
+            $middleware = [];
         }
         
         static::setSerialization($serialization);
@@ -265,52 +272,54 @@ class Router
     }
 
     /**
-     *
-     * @param string $intent            
-     * @param string $action            
+     * @param       $intent
+     * @param       $action
+     * @param array $matching
      */
-    public static function get($intent, $action, $matching = array())
+    public static function get($intent, $action, array $matching = [])
     {
         static::map('get', $intent, $action, $matching);
     }
 
     /**
-     *
-     * @param string $intent            
-     * @param string $action            
+     * @param       $intent
+     * @param       $action
+     * @param array $matching
      */
-    public static function post($intent, $action, $matching = array())
+    public static function post($intent, $action, array $matching = [])
     {
         static::map('post', $intent, $action, $matching);
     }
 
     /**
-     *
-     * @param string $intent            
-     * @param string $action            
+     * @param       $intent
+     * @param       $action
+     * @param array $matching
      */
-    public static function put($intent, $action, $matching = array())
+    public static function put($intent, $action, array $matching = [])
     {
         static::map('put', $intent, $action, $matching);
     }
 
     /**
-     *
-     * @param string $intent            
-     * @param string $action            
+     * @param       $intent
+     * @param       $action
+     * @param array $matching
      */
-    public static function delete($intent, $action, $matching = array())
+    public static function delete($intent, $action, array $matching = [])
     {
         static::map('delete', $intent, $action, $matching);
     }
 
     /**
+     * @param       $httpMethod
+     * @param       $intent
+     * @param       $action
+     * @param array $matching
      *
-     * @param string $httpMethod            
-     * @param string $intent            
-     * @param string $action            
+     * @throws \Exception
      */
-    protected static function map($httpMethod, $intent, $action, $matching = array())
+    protected static function map($httpMethod, $intent, $action, array $matching = [])
     {
         $Router = IoC::getInstance()->resolve('Router\Router');
         

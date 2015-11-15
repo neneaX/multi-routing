@@ -3,6 +3,8 @@ namespace tests\Router\Dispatchers\RpcDispatcher;
 
 
 use MultiRouting\Router\Dispatchers\RpcDispatcher;
+use MultiRouting\Router\Request;
+use MultiRouting\Router\Route;
 
 class runRouteTest extends \PHPUnit_Framework_TestCase
 {
@@ -58,7 +60,7 @@ class runRouteTest extends \PHPUnit_Framework_TestCase
 
 class RpcDispatcherUnderTestRunRoute extends RpcDispatcher
 {
-    public function runRoute($route, $request)
+    public function runRoute(Route $route, Request $request)
     {
         return parent::runRoute($route, $request);
     }

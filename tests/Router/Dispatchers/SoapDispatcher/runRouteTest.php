@@ -3,6 +3,8 @@ namespace tests\Router\Dispatchers\SoapDispatcher;
 
 
 use MultiRouting\Router\Dispatchers\SoapDispatcher;
+use MultiRouting\Router\Request;
+use MultiRouting\Router\Route;
 
 class createServerTest extends \PHPUnit_Framework_TestCase
 {
@@ -49,7 +51,7 @@ class createServerTest extends \PHPUnit_Framework_TestCase
 
 class SoapDispatcherUnderTestRunRoute extends SoapDispatcher
 {
-    public function runRoute($route, $request)
+    public function runRoute(Route $route, Request $request)
     {
         return parent::runRoute($route, $request);
     }

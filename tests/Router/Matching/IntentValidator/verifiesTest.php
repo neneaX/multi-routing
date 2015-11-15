@@ -3,6 +3,7 @@ namespace tests\Router\Matching\IntentValidator;
 
 
 use MultiRouting\Router\Matching\IntentValidator;
+use MultiRouting\Router\Route;
 
 class verifiesTest extends \PHPUnit_Framework_TestCase
 {
@@ -64,7 +65,7 @@ class verifiesTest extends \PHPUnit_Framework_TestCase
 
 class IntentValidatorUnderTestVerifies extends IntentValidator
 {
-    public function verifies($route, $requestIntent)
+    public function verifies(Route $route, $requestIntent)
     {
         return parent::verifies($route, $requestIntent);
     }

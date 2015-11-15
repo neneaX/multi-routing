@@ -3,6 +3,8 @@ namespace tests\Router\Dispatchers\RpcDispatcher;
 
 
 use MultiRouting\Router\Dispatchers\RpcDispatcher;
+use MultiRouting\Router\Request;
+use MultiRouting\Router\Route;
 
 /**
  * @note Hard couple for namespace prefix "Middleware".
@@ -110,7 +112,7 @@ class runMiddlewareTest extends \PHPUnit_Framework_TestCase
 
 class RpcDispatcherUnderTestRunMiddleware extends RpcDispatcher
 {
-    public function runMiddleware($route, $request)
+    public function runMiddleware(Route $route, Request $request)
     {
         parent::runMiddleware($route, $request);
     }

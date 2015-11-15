@@ -7,6 +7,11 @@
             "name": "Andrei Pirjoleanu",
             "email": "andreipirjoleanu@gmail.com",
             "role": "Developer"
+        },
+        {
+            "name": "Bogdan Anton",
+            "email": "contact@bogdananton.ro",
+            "role": "Developer"
         }
     ],
     "require": {
@@ -15,7 +20,7 @@
     },
     "require-dev": {
       "mockery/mockery": "0.9.*",
-      "phpunit/phpunit": "5.*"
+      "phpunit/phpunit": "*"
     },
     "autoload": {
         "psr-4": {

@@ -60,6 +60,8 @@ class getRequestHandlerTest extends \PHPUnit_Framework_TestCase
 
 class ContainerUnderTest extends Container
 {
+    protected static $instance;
+
     public static function setInstance($instance)
     {
         static::$instance = $instance;

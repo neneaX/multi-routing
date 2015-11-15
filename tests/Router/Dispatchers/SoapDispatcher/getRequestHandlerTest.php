@@ -7,9 +7,15 @@ use MultiRouting\Router\Dispatchers\SoapDispatcher;
 
 class getRequestHandlerTest extends \PHPUnit_Framework_TestCase
 {
+    public function setUp()
+    {
+        Container::reset();
+    }
+
     public function tearDown()
     {
         \Mockery::close();
+        Container::reset();
     }
 
     /**
@@ -21,8 +27,6 @@ class getRequestHandlerTest extends \PHPUnit_Framework_TestCase
 
         $helper = new \ProtectedHelper($object);
         $controller = new \stdClass();
-
-        ContainerUnderTest::setInstance(null);
 
         try {
             $helper->call('getRequestHandler', [$controller]);
@@ -39,31 +43,18 @@ class getRequestHandlerTest extends \PHPUnit_Framework_TestCase
     public function testWhenTheHandlerForThisSoapControllerIsSetInTheDependencyContainerThenReturnIt()
     {
         $expected = new \stdClass();
+        $controller = new \stdClass();
+
+        Container::getInstance()->register('Router\Request\Handler', function ($serialization, $paramController) use ($expected, $controller) {
+            if ($serialization == 'soap' && $paramController === $controller) {
+                return $expected;
+            }
+        });
 
         $object = new SoapDispatcher();
         $helper = new \ProtectedHelper($object);
-        $controller = new \stdClass();
-
-        $containerMock = \Mockery::mock('\IoC\Container')->makePartial();
-        $containerMock->shouldAllowMockingProtectedMethods();
-        $containerMock->shouldReceive('resolve')
-            ->once()
-            ->with('Router\Request\Handler', ['soap', $controller]) // if fail debug here and check passed i/o.
-            ->andReturn($expected);
-
-        ContainerUnderTest::setInstance($containerMock);
 
         $response = $helper->call('getRequestHandler', [$controller]);
         static::assertSame($expected, $response);
-    }
-}
-
-class ContainerUnderTest extends Container
-{
-    protected static $instance;
-
-    public static function setInstance($instance)
-    {
-        static::$instance = $instance;
     }
 }

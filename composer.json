@@ -11,7 +11,8 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "neneax/ioc" : "0.0.*"
+        "illuminate/events": "5.0.*",
+        "illuminate/routing": "5.0.*"
     },
     "require-dev": {
       "mockery/mockery": "0.9.*",
@@ -19,6 +20,7 @@
     },
     "autoload": {
         "psr-4": {
+            "Example\\": "examples/basic/resources",
             "MultiRouting\\": "src/"
         }
     }

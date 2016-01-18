@@ -159,7 +159,11 @@ class Content implements Jsonable
         if ($this->hasError()) {
             $output['error'] = $this->error->toArray();
         } else {
-            $output['result'] = $this->result;
+            if ($this->result instanceof Jsonable) {
+                $output['result'] = json_decode($this->result->toJson());
+            } else {
+                $output['result'] = $this->result;
+            }
         }
 
         return $output;

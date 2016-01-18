@@ -96,15 +96,20 @@ class Route extends BaseRoute
         /** @var ContentFactory $contentFactory */
         $contentFactory = $this->container->make('MultiRouting\\Adapters\\JsonRpc\\Response\\ContentFactory');
 
+        /**
+         * JsonRpc request Id
+         */
+        $requestId = (new Interpreter($request))->getId();
+
         try {
             $controllerResponse = call_user_func_array([$instance, $method], $parameters);
-            $responseContent = $contentFactory->buildFromResult($controllerResponse);
+            $responseContent = $contentFactory->buildFromResult($requestId, $controllerResponse);
             /**
              * The controller can return either a mixed value (return) or an Error (defined as \GenericApplicationImplementation\Error\ErrorInterface
              * @todo check if the responseContent is an \GenericApplicationImplementation\Error\ErrorInterface and use buildFromError instead of buildFromResult
              */
         } catch (\Exception $e) {
-            $responseContent = $contentFactory->buildFromException($e);
+            $responseContent = $contentFactory->buildFromException($requestId, $e);
         }
 
         /**

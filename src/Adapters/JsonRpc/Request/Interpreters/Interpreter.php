@@ -36,11 +36,19 @@ class Interpreter implements InterpreterInterface
     }
 
     /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->parser->getContent()->getId();
+    }
+
+    /**
      * @return string
      */
     public function getIntent()
     {
-        return $this->parser->getCalledMethod();
+        return $this->parser->getContent()->getMethod();
     }
 
     /**
@@ -48,7 +56,7 @@ class Interpreter implements InterpreterInterface
      */
     public function getParameters()
     {
-        return $this->parser->getCalledParams();
+        return $this->parser->getContent()->getParams();
     }
 
     /**

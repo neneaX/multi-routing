@@ -5,6 +5,7 @@ use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher as EventsDispatcher;
 use Illuminate\Http\Request;
 use MultiRouting\Router;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class App
 {
@@ -85,7 +86,12 @@ class App
      */
     public function handle(Request $request)
     {
-        $response = $this->router->dispatch($request);
+        try {
+            $response = $this->router->dispatch($request);
+        } catch (NotFoundHttpException $e) {
+            // parse request to return an error according to protocol
+            exit();
+        }
 
         $response->sendHeaders();
         $response->send();

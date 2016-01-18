@@ -1,7 +1,7 @@
 <?php
 namespace MultiRouting\Adapters\JsonRpc\Request\Parsers;
 
-class JsonRpcParser
+class Parser
 {
     /**
      * The content object
@@ -39,7 +39,7 @@ class JsonRpcParser
                 break;
         }
 
-        if (!$this->content) {
+        if (null === $this->content) {
             throw new \InvalidArgumentException('The input is not allowed.');
         }
     }

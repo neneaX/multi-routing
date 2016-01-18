@@ -1,7 +1,7 @@
 <?php
 namespace MultiRouting\Request\Interpreters;
 
-interface Interpreter
+interface InterpreterInterface
 {
 
     /**

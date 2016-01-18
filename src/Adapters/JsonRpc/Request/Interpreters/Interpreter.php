@@ -2,10 +2,10 @@
 namespace MultiRouting\Adapters\JsonRpc\Request\Interpreters;
 
 use Illuminate\Http\Request;
-use MultiRouting\Adapters\JsonRpc\Request\Parsers\JsonRpcParser;
-use MultiRouting\Request\Interpreters\Interpreter;
+use MultiRouting\Adapters\JsonRpc\Request\Parsers\Parser;
+use MultiRouting\Request\Interpreters\InterpreterInterface;
 
-class JsonRpcInterpreter implements Interpreter
+class Interpreter implements InterpreterInterface
 {
 
     /**
@@ -15,7 +15,7 @@ class JsonRpcInterpreter implements Interpreter
     protected $request;
 
     /**
-     * @var JsonRpcParser
+     * @var Parser
      */
     protected $parser;
 
@@ -32,7 +32,7 @@ class JsonRpcInterpreter implements Interpreter
 
     public function setParser()
     {
-        $this->parser = new JsonRpcParser($this->request->getContent());
+        $this->parser = new Parser($this->request->getContent());
     }
 
     /**

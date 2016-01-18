@@ -32,9 +32,9 @@ class AdapterService
      * @var array
      */
     protected $list = [
-        'Rest' => 'MultiRouting\\Adapters\\Rest\\RestAdapter',
-        'JsonRpc' => 'MultiRouting\\Adapters\\JsonRpc\\JsonRpcAdapter',
-        'Soap' => 'MultiRouting\\Adapters\\Soap\\SoapAdapter'
+        'Rest' => 'MultiRouting\\Adapters\\Rest\\Adapter',
+        'JsonRpc' => 'MultiRouting\\Adapters\\JsonRpc\\Adapter',
+        'Soap' => 'MultiRouting\\Adapters\\Soap\\Adapter'
     ];
 
     /**

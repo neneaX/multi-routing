@@ -1,10 +1,10 @@
 <?php
 namespace MultiRouting\Adapters\JsonRpc;
 
-use MultiRouting\Adapters\Adapter;
+use MultiRouting\Adapters\Adapter as AdapterInterface;
 use MultiRouting\Router;
 
-class JsonRpcAdapter implements Adapter
+class Adapter implements AdapterInterface
 {
 
     /**
@@ -30,7 +30,7 @@ class JsonRpcAdapter implements Adapter
      * @param $uri
      * @param $intent
      * @param $action
-     * @return JsonRpcRoute
+     * @return Route
      */
     public function intent($uri, $intent, $action)
     {
@@ -47,11 +47,11 @@ class JsonRpcAdapter implements Adapter
      * @param $methods
      * @param $uri
      * @param $action
-     * @return JsonRpcRoute
+     * @return Route
      */
     public function buildRoute($methods, $uri, $action)
     {
-        $route = new JsonRpcRoute($methods, $uri, $action);
+        $route = new Route($methods, $uri, $action);
         $route->setIntent($this->currentIntent);
 
         return $route;

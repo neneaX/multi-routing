@@ -38,4 +38,9 @@ class FooBar implements Jsonable
             'bar' => $this->bar
         ]);
     }
+
+    public function __toString()
+    {
+        return $this->foo . ' | ' . $this->bar;
+    }
 }

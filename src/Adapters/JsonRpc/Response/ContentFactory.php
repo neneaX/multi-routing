@@ -11,13 +11,10 @@ class ContentFactory
      * @param \Exception $exception
      * @return Content
      */
-    public function buildFromException($id = 0, \Exception $exception)
+    public function buildFromException(\Exception $exception, $id = null)
     {
-        /**
-         * @todo map specific errors
-         */
         $error = new Error(
-            Error::GENERAL_APPLICATION_CODE,
+            $exception->getCode(),
             $exception->getMessage()
         );
 
@@ -31,13 +28,10 @@ class ContentFactory
      * @param $error
      * @return Content
      */
-    public function buildFromError($id = 0, $error)
+    public function buildFromError($error, $id = null)
     {
-        /**
-         * @todo map specific errors
-         */
         $error = new Error(
-            Error::GENERAL_APPLICATION_CODE,
+            $error->getCode(),
             $error->getMessage()
         );
 
@@ -49,7 +43,7 @@ class ContentFactory
      * @param mixed $result
      * @return Content
      */
-    public function buildFromResult($id = 0, $result)
+    public function buildFromResult($result, $id = null)
     {
         return Content::buildResult($id, $result);
     }

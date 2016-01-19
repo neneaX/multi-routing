@@ -2,6 +2,8 @@
 namespace MultiRouting\Adapters\JsonRpc\Request\Parsers;
 
 use MultiRouting\Adapters\JsonRpc\Request\Content;
+use MultiRouting\Adapters\JsonRpc\Response\Errors\InvalidRequest;
+use MultiRouting\Adapters\JsonRpc\Response\Errors\ParseError;
 
 class Parser
 {
@@ -9,6 +11,10 @@ class Parser
     const JSON_RPC_VERSION = '2.0';
 
     /**
+     * The errors occurred during raw content validation against the JSON-RPC standards
+     *
+     * $priority => $error
+     *
      * @var array
      */
     protected $errors;
@@ -79,33 +85,37 @@ class Parser
 
     protected function buildContent()
     {
-        if (null === $this->errors) {
-            $this->content = new Content(
-                $this->getRawContentId(),
-                $this->getRawContentMethod(),
-                $this->getRawContentParams()
-            );
-        }
+        $this->content = new Content(
+            $this->getRawContentId(),
+            $this->getRawContentMethod(),
+            $this->getRawContentParams()
+        );
     }
 
     /**
     * Get the request id from the content
     *
-    * @return int
+    * @return int|null
     */
-    public function getRawContentId()
+    protected function getRawContentId()
     {
-        return $this->rawContent->id;
+        if (isset($this->rawContent->id)) {
+            return $this->rawContent->id;
+        }
+        return null;
     }
 
     /**
      * Get the called method from the content
      *
-     * @return string
+     * @return string|null
      */
-    public function getRawContentMethod()
+    protected function getRawContentMethod()
     {
-        return $this->rawContent->method;
+        if (isset($this->rawContent->method)) {
+            return $this->rawContent->method;
+        }
+        return null;
     }
 
     /**
@@ -115,11 +125,10 @@ class Parser
      */
     protected function getRawContentParams()
     {
-        if (!isset($this->rawContent->params)) {
-            return [];
+        if (isset($this->rawContent->params)) {
+            return is_array($this->rawContent->params) ? $this->rawContent->params : get_object_vars($this->rawContent->params);
         }
-
-        return is_array($this->rawContent->params) ? $this->rawContent->params : get_object_vars($this->rawContent->params);
+        return [];
     }
 
     /**
@@ -130,26 +139,34 @@ class Parser
         try {
             $this->validateContent();
         } catch (\Exception $e) {
-            $this->errors['content'] = $e->getMessage();
+            $this->errors[0] = new ParseError();
             return;
         }
 
         try {
             $this->validateVersion();
         } catch (\Exception $e) {
-            $this->errors['version'] = $e->getMessage();
+            $this->errors[1] = new InvalidRequest();
         }
 
         try {
             $this->validateId();
         } catch (\Exception $e) {
-            $this->errors['id'] = $e->getMessage();
+            // The id is not set or is invalid
+            try {
+                $this->validateIdExists();
+
+                // If validating passes, the id is set but invalid
+                $this->errors[1] = new InvalidRequest();
+            } catch (\Exception $e) {
+                // The id is not set, the request is a Notification
+            }
         }
 
         try {
             $this->validateMethod();
         } catch (\Exception $e) {
-            $this->errors['method'] = $e->getMessage();
+            $this->errors[1] = new InvalidRequest();
         }
     }
 
@@ -173,10 +190,24 @@ class Parser
     protected function validateVersion()
     {
         if ( !isset($this->rawContent->jsonrpc)
-            || !is_numeric($this->rawContent->jsonrpc)
-            || $this->rawContent->jsonrpc != static::JSON_RPC_VERSION
+            || $this->rawContent->jsonrpc !== static::JSON_RPC_VERSION
         ) {
             throw new \Exception('Invalid JSON-RPC version');
+        }
+    }
+
+    /**
+     * Validate if the JSON-RPC id is sent in the Request
+     * In case it is not sent, we assume the Request is a Notification
+     *
+     * @see http://www.jsonrpc.org/specification#notification
+     *
+     * @throws \Exception
+     */
+    protected function validateIdExists()
+    {
+        if (!property_exists($this->rawContent, 'id')) {
+            throw new \Exception('The request is a notification');
         }
     }
 
@@ -187,7 +218,7 @@ class Parser
      */
     protected function validateId()
     {
-        if (!isset($this->rawContent->id) || !is_numeric($this->rawContent->id)) {
+        if (property_exists($this->rawContent, 'id') && !is_numeric($this->rawContent->id)) {
             throw new \Exception('Invalid JSON-RPC id');
         }
     }

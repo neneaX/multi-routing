@@ -11,6 +11,5 @@ $client = new SoapClient(
 );
 
 print_r($client->__getFunctions());
-
 echo '===================';
 print_r($client->__call('ping', ['Input' => 'ping']));

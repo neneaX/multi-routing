@@ -8,9 +8,6 @@ use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
 use Illuminate\Routing\Route as BaseRoute;
 use MultiRouting\Adapters\Soap\Matching\IntentValidator;
-use MultiRouting\Adapters\Soap\Request\Interpreters\Interpreter;
-use MultiRouting\Adapters\Soap\Response\ContentFactory;
-use MultiRouting\Adapters\Soap\Response\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Route extends BaseRoute
@@ -59,21 +56,6 @@ class Route extends BaseRoute
     }
 
     /**
-     * Extract the parameter list from the request.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function bindParameters(Request $request)
-    {
-        $requestInterpreter = new Interpreter($request);
-
-        $params = $requestInterpreter->getParameters();
-
-        return $this->parameters = $params;
-    }
-
-    /**
      * Run the route action and return the response.
      *
      * @param Request $request
@@ -88,14 +70,14 @@ class Route extends BaseRoute
             $this->parametersWithoutNulls(), $class, $method
         );
 
-        if ( ! method_exists($instance = $this->container->make($class), $method))
+        if ( !method_exists($instance = $this->container->make($class), $method))
         {
             throw new NotFoundHttpException;
         }
 
         try {
             // todo: get the wsdl path from a config file not from a constant.
-            $soapServer = new \SoapServer(WSDL_PATH);
+            $soapServer = new \SoapServer(WSDL_FILE);
         } catch (\SoapFault $e) {
             throw new \SoapFault(500, 'The application encountered an unexpected error.');
         }

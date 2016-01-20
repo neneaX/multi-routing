@@ -8,6 +8,11 @@ class Adapter implements AdapterInterface
 {
 
     /**
+     * The adapter name used for registering and implementing other functionality
+     */
+    const name = 'Soap';
+
+    /**
      * @var Router
      */
     protected $router;

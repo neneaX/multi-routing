@@ -3,7 +3,6 @@ namespace MultiRouting;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Routing\Route;
 use MultiRouting\Adapters\Adapter;
 
 class Router extends \Illuminate\Routing\Router
@@ -38,6 +37,7 @@ class Router extends \Illuminate\Routing\Router
     {
         parent::__construct($events, $container);
 
+        $this->setRoutes(new RouteCollection());
         $this->adapterService = new AdapterService($this->container);
     }
 

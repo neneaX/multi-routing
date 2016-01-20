@@ -4,6 +4,8 @@ namespace Example;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher as EventsDispatcher;
 use Illuminate\Http\Request;
+use MultiRouting\Adapters\Soap\Adapter as SoapAdapter;
+use MultiRouting\Adapters\JsonRpc\Adapter as JsonRpcAdapter;
 use MultiRouting\Router;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -59,8 +61,8 @@ class App
 
         $this->router = new Router($eventsDispatcher, $this->container);
         $this->router->useAdapters([
-            'JsonRpc',
-            'Soap',
+            JsonRpcAdapter::name,
+            SoapAdapter::name,
             'Rest'
         ]);
     }

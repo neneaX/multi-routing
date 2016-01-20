@@ -2,6 +2,8 @@
 namespace MultiRouting;
 
 use Illuminate\Container\Container;
+use MultiRouting\Adapters\Soap\Adapter as SoapAdapter;
+use MultiRouting\Adapters\JsonRpc\Adapter as JsonRpcAdapter;
 
 class AdapterService
 {
@@ -33,8 +35,8 @@ class AdapterService
      */
     protected $list = [
         'Rest' => 'MultiRouting\\Adapters\\Rest\\Adapter',
-        'JsonRpc' => 'MultiRouting\\Adapters\\JsonRpc\\Adapter',
-        'Soap' => 'MultiRouting\\Adapters\\Soap\\Adapter'
+        JsonRpcAdapter::name => 'MultiRouting\\Adapters\\JsonRpc\\Adapter',
+        SoapAdapter::name => 'MultiRouting\\Adapters\\Soap\\Adapter'
     ];
 
     /**

@@ -6,7 +6,7 @@ use Illuminate\Routing\Matching\HostValidator;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
-use Illuminate\Routing\Route as BaseRoute;
+use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\JsonRpc\Exceptions\NotificationException;
 use MultiRouting\Adapters\JsonRpc\Matching\IntentValidator;
 use MultiRouting\Adapters\JsonRpc\Request\Interpreters\Interpreter;
@@ -136,5 +136,18 @@ class Route extends BaseRoute
          */
 
         return new Response($responseContent);
+    }
+
+    /**
+     * @return string
+     */
+    public function getCollectionIdentifier()
+    {
+        return $this->glueCollectionIdentifierPieces([
+            Adapter::name,
+            $this->domain(),
+            $this->getUri(),
+            $this->getIntent()
+        ]);
     }
 }

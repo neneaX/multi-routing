@@ -34,8 +34,15 @@ class TestController
         return $fooBar;
     }
 
+    public function getSomeFooBarWithSandwich()
+    {
+        $fooBar = new FooBar('sand', 'witch');
+
+        return $fooBar;
+    }
+
     public function describe()
     {
-        return 'bla';
+        return 'describing';
     }
 }

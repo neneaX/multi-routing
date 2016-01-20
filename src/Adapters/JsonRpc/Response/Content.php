@@ -171,7 +171,10 @@ class Content implements Jsonable
 
     public function toJson($options = 0)
     {
-        return json_encode($this->toArray());
+        if (phpversion() > '5.4.0') {
+            $options |= JSON_UNESCAPED_UNICODE | JSON_BIGINT_AS_STRING | JSON_UNESCAPED_SLASHES;
+        }
+        return json_encode($this->toArray(), $options);
     }
 
 }

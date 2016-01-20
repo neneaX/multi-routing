@@ -66,4 +66,22 @@ class Interpreter implements InterpreterInterface
     {
         return $this->getSessionId();
     }
+
+    public function hasErrors()
+    {
+        return (null !== $this->parser->getErrors());
+    }
+
+    public function getFirstError()
+    {
+        foreach ($this->parser->getErrors() as $error) {
+            return $error;
+        }
+        return null;
+    }
+
+    public function getErrors()
+    {
+        return $this->parser->getErrors();
+    }
 }

@@ -6,7 +6,10 @@
         </testsuite>
     </testsuites>
     <php>
+        <!--<ini name="always_populate_raw_post_data" value="-1" />-->
+        <!--<ini name="error_reporting" value="E_ALL &amp; ~E_DEPRECATED" />-->
         <env name="no_proxy" value="*" />
+        <const name="APP_URL" value="http://multi-router.dev" />
         <const name="CURRENT_API_VERSION" value="1.1" />
         <const name="WSDL_PATH" value="./tests/soap-wsdl-literal.sample.wsdl" />
     </php>

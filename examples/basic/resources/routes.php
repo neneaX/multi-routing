@@ -5,17 +5,17 @@
 $jsonRpc = \MultiRouting\Adapters\JsonRpc\Adapter::name;
 $soap = \MultiRouting\Adapters\Soap\Adapter::name;
 
-$this->router->get('/foobar/{foo?}/{bar?}', 'Example\Foo\Application\Controllers\TestController@getSomeFooBar');
+$this->router->adapter($jsonRpc)->intent('/', 'getDetails', 'Example\Foo\Application\Controllers\TestController@getDetailsSuccess');
+$this->router->adapter($jsonRpc)->intent('/', 'getError', 'Example\Foo\Application\Controllers\TestController@getErrorException');
 
-$this->router->post('/', 'Example\Foo\Application\Controllers\TestController@getSomeFooBarWithSandwich');
-
-$this->router->adapter($jsonRpc)->intent('/', 'getFooAndBar', 'Example\Foo\Application\Controllers\TestController@getSomeFooBar');
-$this->router->adapter($jsonRpc)->intent('/', 'describe', 'Example\Foo\Application\Controllers\TestController@getSomeFooBarWithSandwich');
-
-
-
-$this->router->adapter($soap)->intent('/', 'getFooAndBar', 'Example\Foo\Application\Controllers\TestController@getSomeFooBar');
-
-//$this->router->adapter('Soap')->intent('/', 'describe', 'Example\Foo\Application\Controllers\TestController@describe');
+$this->router->adapter($soap)->intent('/soap', 'getItem', 'Example\Foo\Application\Controllers\TestController@getItemSuccess');
+$this->router->adapter('Soap')->intent('/', 'getError', 'Example\Foo\Application\Controllers\TestController@getErrorSoapFault');
 
 //$this->router->adapter('Soap')->intent('/', 'ping', 'Example\Foo\Application\Controllers\TestController@getSomeFooBar');
+
+// @note moved this here because of greedy [POST /] route
+$this->router->get('/wsdl', 'Example\Foo\Application\Controllers\TestController@deliverWSDLFile');
+$this->router->get('/', 'Example\Foo\Application\Controllers\TestController@getHomepage');
+$this->router->post('/', 'Example\Foo\Application\Controllers\TestController@getSomeFooBarWithSandwich');
+$this->router->get('/foobar/{foo?}/{bar?}', 'Example\Foo\Application\Controllers\TestController@getSomeFooBar');
+

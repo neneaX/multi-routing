@@ -33,4 +33,9 @@ class TestController
 
         return $fooBar;
     }
+
+    public function describe()
+    {
+        return 'bla';
+    }
 }

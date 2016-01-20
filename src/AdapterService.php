@@ -80,13 +80,14 @@ class AdapterService
      */
     public function getAdapter($name, Router $router)
     {
+        $alias = static::CONTAINER_ADAPTER_PREFIX . $name;
         $this->validateAdapter($name);
 
-        if (false === $this->container->bound($this->list[$name])) {
+        if (false === $this->container->bound($alias)) {
             $this->bindAdapter($name);
         }
 
-        return $this->container->make(static::CONTAINER_ADAPTER_PREFIX . $name, [$router]);
+        return $this->container->make($alias, [$router]);
     }
 
     /**
@@ -96,8 +97,9 @@ class AdapterService
      */
     protected function bindAdapter($name)
     {
+        $alias = static::CONTAINER_ADAPTER_PREFIX . $name;
         $this->container->singleton(
-            static::CONTAINER_ADAPTER_PREFIX . $name,
+            $alias,
             $this->list[$name]
         );
     }

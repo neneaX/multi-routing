@@ -124,7 +124,7 @@ class Parser implements ParserInterface
         }
 
         if (!$status) {
-            throw new \Exception('String is not valid DOM.');
+            return null;
         }
 
         return $DOM;
@@ -138,6 +138,9 @@ class Parser implements ParserInterface
      */
     public function getRawContentMethod()
     {
+        if (null === $this->rawContent) {
+            return null;
+        }
         $bodyNodeList = $this->rawContent->getElementsByTagName('Body');
         foreach ($bodyNodeList as $bodyNode) {
             // get elements with namespaces
@@ -157,6 +160,9 @@ class Parser implements ParserInterface
      */
     public function getRawContentParams()
     {
+        if (null === $this->rawContent) {
+            return [];
+        }
         $params = [];
         $bodyNodeList = $this->rawContent->getElementsByTagName('Body');
         foreach ($bodyNodeList as $bodyNode) {

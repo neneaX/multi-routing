@@ -12,11 +12,9 @@ class Content
     protected $jsonrpc = '2.0';
 
     /**
-     * The result of the call if successful
-     *
-     * This member is REQUIRED on success.
-     * This member MUST NOT exist if there was an error invoking the method.
-     * The value of this member is determined by the method invoked on the Server.
+     * A String containing the name of the method to be invoked.
+     * Method names that begin with the word rpc followed by a period character (U+002E or ASCII 46)
+     * are reserved for rpc-internal methods and extensions and MUST NOT be used for anything else.
      *
      * @see http://www.jsonrpc.org/specification#request_object
      *
@@ -25,9 +23,8 @@ class Content
     protected $method;
 
     /**
-     * A String containing the name of the method to be invoked.
-     * Method names that begin with the word rpc followed by a period character (U+002E or ASCII 46)
-     * are reserved for rpc-internal methods and extensions and MUST NOT be used for anything else.
+     * A Structured value that holds the parameter values to be used during the invocation of the method.
+     * This member MAY be omitted.
      *
      * @see http://www.jsonrpc.org/specification#request_object
      *

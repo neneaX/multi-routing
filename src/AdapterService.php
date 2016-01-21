@@ -2,6 +2,8 @@
 namespace MultiRouting;
 
 use Illuminate\Container\Container;
+use MultiRouting\Adapters\AdapterInterface;
+use MultiRouting\Adapters\Main\Adapter as MainAdapter;
 use MultiRouting\Adapters\Soap\Adapter as SoapAdapter;
 use MultiRouting\Adapters\JsonRpc\Adapter as JsonRpcAdapter;
 
@@ -34,6 +36,7 @@ class AdapterService
      * @var array
      */
     protected $list = [
+        MainAdapter::name => 'MultiRouting\\Adapters\\Main\\Adapter',
         'Rest' => 'MultiRouting\\Adapters\\Rest\\Adapter',
         JsonRpcAdapter::name => 'MultiRouting\\Adapters\\JsonRpc\\Adapter',
         SoapAdapter::name => 'MultiRouting\\Adapters\\Soap\\Adapter'
@@ -44,7 +47,19 @@ class AdapterService
      *
      * @var array
      */
-    protected $allowed = [];
+    protected $allowed = [
+        MainAdapter::name
+    ];
+
+    /**
+     * @var AdapterInterface
+     */
+    protected $defaultAdapter;
+
+    /**
+     * @var AdapterInterface
+     */
+    protected $adapterInUse;
 
     /**
      * Register a new adapter in the list
@@ -93,6 +108,32 @@ class AdapterService
     }
 
     /**
+     * @return AdapterInterface
+     */
+    public function getDefaultAdapter()
+    {
+        return $this->defaultAdapter;
+    }
+
+    /**
+     * @param $name
+     * @param Router $router
+     * @return mixed
+     */
+    public function setDefaultAdapter($name, Router $router)
+    {
+        return $this->adapterInUse = $this->defaultAdapter = $this->getAdapter($name, $router);
+    }
+
+    /**
+     * @return AdapterInterface
+     */
+    public function getAdapterInUse()
+    {
+        return $this->adapterInUse;
+    }
+
+    /**
      * Bind an adapter to the container
      *
      * @param string $name
@@ -104,6 +145,39 @@ class AdapterService
             $alias,
             $this->list[$name]
         );
+    }
+
+    /**
+     * Use an allowed adapter
+     *
+     * @param $name
+     * @param Router $router
+     * @return AdapterInterface
+     */
+    public function useAdapter($name, Router $router)
+    {
+        $adapter = $this->getAdapter($name, $router);
+
+        return $this->startUsingAdapter($adapter);
+    }
+
+    /**
+     * Start using a given adapter
+     *
+     * @param AdapterInterface $adapter
+     * @return AdapterInterface
+     */
+    protected function startUsingAdapter(AdapterInterface $adapter)
+    {
+        return $this->adapterInUse = $adapter;
+    }
+
+    /**
+     * Stop using an adapter
+     */
+    public function resetAdapter()
+    {
+        return $this->adapterInUse = $this->getDefaultAdapter();
     }
 
     /**

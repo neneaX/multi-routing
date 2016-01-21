@@ -4,6 +4,7 @@ namespace Example;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher as EventsDispatcher;
 use Illuminate\Http\Request;
+use MultiRouting\Adapters\Main\Adapter as MainAdapter;
 use MultiRouting\Adapters\Soap\Adapter as SoapAdapter;
 use MultiRouting\Adapters\JsonRpc\Adapter as JsonRpcAdapter;
 use MultiRouting\Router;
@@ -60,7 +61,8 @@ class App
         $eventsDispatcher = new EventsDispatcher($this->container);
 
         $this->router = new Router($eventsDispatcher, $this->container);
-        $this->router->useAdapters([
+        $this->router->allowAdapters([
+            MainAdapter::name,
             JsonRpcAdapter::name,
             SoapAdapter::name,
             'Rest'

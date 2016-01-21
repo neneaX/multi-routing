@@ -4,6 +4,7 @@ namespace MultiRouting\Adapters\Soap\Request\Interpreters;
 use Illuminate\Http\Request;
 use MultiRouting\Adapters\Soap\Request\Parsers\Parser;
 use MultiRouting\Request\Interpreters\InterpreterInterface;
+use \SimpleXMLElement as SimpleXMLElement;
 
 class Interpreter implements InterpreterInterface
 {
@@ -23,24 +24,17 @@ class Interpreter implements InterpreterInterface
      * RpcInterpreter constructor.
      *
      * @param Request $request
+     * @param SimpleXMLElement $wsdl
      */
-    public function __construct(Request $request)
+    public function __construct(Request $request, SimpleXMLElement $wsdl)
     {
         $this->request = $request;
-        $this->setParser();
+        $this->setParser($wsdl);
     }
 
-    public function setParser()
+    public function setParser(SimpleXMLElement $wsdl)
     {
-        $this->parser = new Parser($this->request->getContent());
-    }
-
-    /**
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->parser->getContent()->getId();
+        $this->parser = new Parser($this->request->getContent(), $wsdl);
     }
 
     /**
@@ -57,13 +51,5 @@ class Interpreter implements InterpreterInterface
     public function getParameters()
     {
         return $this->parser->getContent()->getParams();
-    }
-
-    /**
-     * @return string
-     */
-    public function getSessionId()
-    {
-        return $this->getSessionId();
     }
 }

@@ -14,11 +14,40 @@ class Route extends BaseRoute
 {
 
     /**
+     * The server WSDL against whom the request is matched
+     *
+     * @var \SimpleXMLElement
+     */
+    protected $wsdl;
+
+    /**
      * The intent (called method) that the SOAP route responds to.
      *
      * @var string
      */
     protected $intent;
+
+    public function getWsdl()
+    {
+        return $this->wsdl;
+    }
+
+    /**
+     * @param string $wsdlPath
+     */
+    public function setWsdl($wsdlPath)
+    {
+       if (file_exists($wsdlPath)) {
+           $wsdl = simplexml_load_file($wsdlPath);
+           if (false !== $wsdl) {
+               $this->wsdl = $wsdl;
+           } else {
+               // @todo throw exception? destroy everything? set an error? die? exit?
+           }
+       } else {
+           // @todo throw exception? destroy everything? set an error? die? exit?
+       }
+    }
 
     /**
      * @return string
@@ -61,6 +90,7 @@ class Route extends BaseRoute
      * @param Request $request
      * @return mixed
      * @throws NotFoundHttpException
+     * @throws \SoapFault
      */
     protected function runController(Request $request)
     {

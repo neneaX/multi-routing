@@ -1,8 +1,8 @@
 <?php
-namespace MultiRouting\Adapters\JsonRpc;
+namespace MultiRouting\Adapters\Main;
 
-use MultiRouting\Adapters\AdapterInterface;
 use MultiRouting\Router;
+use MultiRouting\Adapters\AdapterInterface;
 
 class Adapter implements AdapterInterface
 {
@@ -10,17 +10,12 @@ class Adapter implements AdapterInterface
     /**
      * The adapter name used for registering and implementing other functionality
      */
-    const name = 'JsonRpc';
+    const name = 'Main';
 
     /**
      * @var Router
      */
     protected $router;
-
-    /**
-     * @var string
-     */
-    protected $currentIntent;
 
     /**
      * JsonRpcAdapter constructor.
@@ -32,19 +27,6 @@ class Adapter implements AdapterInterface
     }
 
     /**
-     * @param $uri
-     * @param $intent
-     * @param $action
-     * @return Route
-     */
-    public function intent($uri, $intent, $action)
-    {
-        $this->currentIntent = $intent;
-
-        return $this->router->post($uri, $action);
-    }
-
-    /**
      * @param $methods
      * @param $uri
      * @param $action
@@ -53,7 +35,6 @@ class Adapter implements AdapterInterface
     public function buildRoute($methods, $uri, $action)
     {
         $route = new Route($methods, $uri, $action);
-        $route->setIntent($this->currentIntent);
 
         return $route;
     }

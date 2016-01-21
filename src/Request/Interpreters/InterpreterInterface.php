@@ -13,10 +13,4 @@ interface InterpreterInterface
      * @return array
      */
     public function getParameters();
-    
-    /**
-     * @return string
-     */
-    public function getSessionId();
-    
 }

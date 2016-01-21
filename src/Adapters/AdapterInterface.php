@@ -3,7 +3,7 @@ namespace MultiRouting\Adapters;
 
 use MultiRouting\Router;
 
-interface Adapter
+interface AdapterInterface
 {
 
     /**

@@ -1,7 +1,7 @@
 <?php
 namespace MultiRouting\Adapters\Soap;
 
-use MultiRouting\Adapters\Adapter as AdapterInterface;
+use MultiRouting\Adapters\AdapterInterface;
 use MultiRouting\Router;
 
 class Adapter implements AdapterInterface
@@ -23,12 +23,28 @@ class Adapter implements AdapterInterface
     protected $currentIntent;
 
     /**
+     * @var string
+     */
+    protected $currentWsdlPath;
+
+    /**
      * Adapter constructor.
      * @param Router $router
      */
     public function __construct(Router $router)
     {
         $this->router = $router;
+    }
+
+    /**
+     * @param $wsdlPath
+     * @return $this
+     */
+    public function wsdl($wsdlPath)
+    {
+        $this->currentWsdlPath = $wsdlPath;
+
+        return $this;
     }
 
     /**
@@ -41,11 +57,7 @@ class Adapter implements AdapterInterface
     {
         $this->currentIntent = $intent;
 
-        $route = $this->router->post($uri, $action);
-
-        $this->router->stopUsingAdapter();
-
-        return $route;
+        return $this->router->post($uri, $action);
     }
 
     /**
@@ -58,6 +70,7 @@ class Adapter implements AdapterInterface
     {
         $route = new Route($methods, $uri, $action);
         $route->setIntent($this->currentIntent);
+        $route->setWsdl($this->currentWsdlPath);
 
         return $route;
     }

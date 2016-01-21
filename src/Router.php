@@ -3,7 +3,8 @@ namespace MultiRouting;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
-use MultiRouting\Adapters\Adapter;
+use MultiRouting\Adapters\AdapterInterface;
+use MultiRouting\Adapters\Main\Adapter as MainAdapter;
 
 class Router extends \Illuminate\Routing\Router
 {
@@ -14,17 +15,7 @@ class Router extends \Illuminate\Routing\Router
     protected $adapterService;
 
     /**
-     * Flag for determining whether an adapter is in use for the current task or not
-     * This is necessary for processing the basic logic or switching to adapter specific logic
-     *
-     * Possible task examples: mapping a route, dispatching a request etc.
-     *
-     * @var bool
-     */
-    protected $adapterInUse = false;
-
-    /**
-     * @var Adapter
+     * @var AdapterInterface
      */
     protected $currentAdapter;
 
@@ -39,17 +30,18 @@ class Router extends \Illuminate\Routing\Router
 
         $this->setRoutes(new RouteCollection());
         $this->adapterService = new AdapterService($this->container);
+        $this->setDefaultAdapter(MainAdapter::name);
     }
 
     /**
      * Register a custom routing adapter
      *
-     * @param $name
-     * @param $class
+     * @param string $adapterName
+     * @param string $class
      */
-    public function registerAdapter($name, $class)
+    public function registerAdapter($adapterName, $class)
     {
-        $this->adapterService->registerAdapter($name, $class);
+        $this->adapterService->registerAdapter($adapterName, $class);
     }
 
     /**
@@ -57,7 +49,7 @@ class Router extends \Illuminate\Routing\Router
      *
      * @param array $adapters
      */
-    public function useAdapters(array $adapters = [])
+    public function allowAdapters(array $adapters = [])
     {
         foreach ($adapters as $adapterName) {
             $this->adapterService->allowAdapter($adapterName);
@@ -65,34 +57,37 @@ class Router extends \Illuminate\Routing\Router
     }
 
     /**
+     * @param string $adapterName
+     */
+    public function setDefaultAdapter($adapterName)
+    {
+        $this->adapterService->setDefaultAdapter($adapterName, $this);
+    }
+
+    /**
      * @param $adapterName
-     * @return Adapter
+     * @return AdapterInterface
      */
     public function adapter($adapterName)
     {
-        $adapter = $this->adapterService->getAdapter($adapterName, $this);
-        $this->startUsingAdapter($adapter);
-
-        return $this->currentAdapter;
+        return $this->adapterService->useAdapter($adapterName, $this);
     }
 
     /**
-     * Start using a given adapter
+     * Add a route to the underlying route collection.
      *
-     * @param Adapter $adapter
+     * @param  array|string  $methods
+     * @param  string  $uri
+     * @param  \Closure|array|string  $action
+     * @return \Illuminate\Routing\Route
      */
-    protected function startUsingAdapter(Adapter $adapter)
+    protected function addRoute($methods, $uri, $action)
     {
-        $this->currentAdapter = $adapter;
-        $this->adapterInUse = true;
-    }
+        $route = parent::addRoute($methods, $uri, $action);
 
-    /**
-     * Stop using an adapter
-     */
-    public function stopUsingAdapter()
-    {
-        $this->adapterInUse = false;
+        $this->adapterService->resetAdapter();
+
+        return $route;
     }
 
     /**
@@ -103,14 +98,10 @@ class Router extends \Illuminate\Routing\Router
      */
     protected function newRoute($methods, $uri, $action)
     {
-        if (true === $this->adapterInUse) {
-            $route = $this->currentAdapter->buildRoute($methods, $uri, $action);
-        } else {
-            $route = new Route($methods, $uri, $action);
-        }
-        $route->setContainer($this->container);
-
-        return $route;
+        return $this->adapterService
+            ->getAdapterInUse()
+            ->buildRoute($methods, $uri, $action)
+            ->setContainer($this->container);
     }
 
 }

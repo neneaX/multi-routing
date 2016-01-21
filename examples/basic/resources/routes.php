@@ -14,7 +14,7 @@ $this->router->adapter($jsonRpc)->intent('/', 'describe', 'Example\Foo\Applicati
 
 
 
-$this->router->adapter($soap)->intent('/', 'getFooAndBar', 'Example\Foo\Application\Controllers\TestController@getSomeFooBar');
+$this->router->adapter($soap)->wsdl(WSDL_PATH)->intent('/', 'getFooAndBar', 'Example\Foo\Application\Controllers\TestController@getSomeFooBar');
 
 //$this->router->adapter('Soap')->intent('/', 'describe', 'Example\Foo\Application\Controllers\TestController@describe');
 

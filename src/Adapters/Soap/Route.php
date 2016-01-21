@@ -6,12 +6,20 @@ use Illuminate\Routing\Matching\HostValidator;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
+use MultiRouting\Adapters\Soap\Request\Interpreters\Interpreter;
 use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\Soap\Matching\IntentValidator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Route extends BaseRoute
 {
+
+    /**
+     * The path to the server WSDL whom the request is matched against
+     *
+     * @var string
+     */
+    protected $wsdlPath;
 
     /**
      * The server WSDL against whom the request is matched
@@ -27,6 +35,17 @@ class Route extends BaseRoute
      */
     protected $intent;
 
+    /**
+     * @return string
+     */
+    public function getWsdlPath()
+    {
+        return $this->wsdlPath;
+    }
+
+    /**
+     * @return \SimpleXMLElement
+     */
     public function getWsdl()
     {
         return $this->wsdl;
@@ -40,6 +59,7 @@ class Route extends BaseRoute
        if (file_exists($wsdlPath)) {
            $wsdl = simplexml_load_file($wsdlPath);
            if (false !== $wsdl) {
+               $this->wsdlPath = $wsdlPath;
                $this->wsdl = $wsdl;
            } else {
                // @todo throw exception? destroy everything? set an error? die? exit?
@@ -85,6 +105,21 @@ class Route extends BaseRoute
     }
 
     /**
+     * Extract the parameter list from the request.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function bindParameters(Request $request)
+    {
+        $requestInterpreter = new Interpreter($request, $this->getWsdl());
+
+        $params = $requestInterpreter->getParameters();
+
+        return $this->parameters = $params;
+    }
+
+    /**
      * Run the route action and return the response.
      *
      * @param Request $request
@@ -106,13 +141,13 @@ class Route extends BaseRoute
         }
 
         try {
-            // todo: get the wsdl path from a config file not from a constant.
-            $soapServer = new \SoapServer(WSDL_FILE);
+            $soapServer = new \SoapServer($this->getWsdlPath());
         } catch (\SoapFault $e) {
             throw new \SoapFault(500, 'The application encountered an unexpected error.');
         }
 
         try {
+
             $soapHandler = $this->container->make(
                 'MultiRouting\\Adapters\\Soap\\Request\\Handlers\\Handler',
                 [

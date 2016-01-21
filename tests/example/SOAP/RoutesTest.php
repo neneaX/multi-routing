@@ -46,14 +46,13 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
         try {
             $response = $client->getItem('TNE');
-
         } catch (\SoapFault $e) {
             static::fail($e->getMessage());
         }
 
         static::assertNotNull($response);
         static::assertTrue(is_object($response));
-        static::assertEquals('TNE', $response->Name);
+        static::assertEquals('TNE', $response->name);
     }
 
     /**
@@ -69,11 +68,11 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
         $response = '';
 
         try {
-            $response = $client->getError('pineapple');
+            $response = $client->pineapple();
             static::fail('was expecting a SoapFault, got [' . serialize($response) . '] instead');
 
         } catch (\SoapFault $e) {
-            static::assertEquals('Cound not find [pineapple].', $e->getMessage());
+            static::assertEquals('Function ("pineapple") is not a valid method for this service', $e->getMessage());
         }
     }
 
@@ -109,10 +108,8 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
         try {
             $response = $client->ping();
             static::fail('was expecting a SoapFault, got [' . serialize($response) . '] instead');
-
         } catch (\SoapFault $e) {
-            // @note will fail with "looks like we got no XML document"
-            static::assertEquals('???', $e->getMessage());
+            static::assertEquals('Not Found', $e->getMessage());
         }
     }
 }

@@ -4,10 +4,12 @@ namespace Example;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher as EventsDispatcher;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use MultiRouting\Adapters\Main\Adapter as MainAdapter;
 use MultiRouting\Adapters\Soap\Adapter as SoapAdapter;
 use MultiRouting\Adapters\JsonRpc\Adapter as JsonRpcAdapter;
 use MultiRouting\Router;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class App
@@ -94,12 +96,12 @@ class App
             $response = $this->router->dispatch($request);
         } catch (NotFoundHttpException $e) {
             // parse request to return an error according to protocol
-            exit();
+            $response = new Response('Page not found', 404);
+        } catch (MethodNotAllowedHttpException $e) {
+            $response = new Response('Page not found', 404);
         }
 
-        // @todo re-enable or delete todo and commented line.
-        // had an issue with php-fpm: "FastCGI: comm with server "/php-fpm" aborted: error parsing headers: duplicate header 'Content-Type'"
-        // $response->sendHeaders();
+        $response->sendHeaders();
         $response->send();
 
         return $response;

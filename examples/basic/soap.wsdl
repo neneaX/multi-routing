@@ -14,10 +14,10 @@
             <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
             <xsd:complexType name="Item">
                 <xsd:sequence>
-                    <xsd:element name="Code" type="xsd:string" nillable="true"/>
-                    <xsd:element name="Name" type="xsd:string"/>
-                    <xsd:element name="Quantity" type="xsd:integer"/>
-                    <xsd:element name="Enabled" type="xsd:boolean"/>
+                    <xsd:element name="code" type="xsd:string" nillable="true"/>
+                    <xsd:element name="name" type="xsd:string"/>
+                    <xsd:element name="quantity" type="xsd:integer"/>
+                    <xsd:element name="enabled" type="xsd:boolean"/>
                 </xsd:sequence>
             </xsd:complexType>
         </xsd:schema>

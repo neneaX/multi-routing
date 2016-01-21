@@ -73,7 +73,7 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
         $contents = null;
 
         try {
-            $response = $client->post(APP_URL, $options);
+            $response = $client->post(APP_URL . '/sandwich', $options);
             $contents = $response->getBody()->getContents();
 
         } catch (ClientException $e) {
@@ -101,8 +101,9 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
 
         } catch (ClientException $e) {
             static::assertEquals(404, $e->getResponse()->getStatusCode());
-        }
+            $contents = $e->getResponse()->getBody()->getContents();
+        };
 
-        static::assertNull($contents);
+        static::assertEquals('Page not found', $contents);
     }
 }

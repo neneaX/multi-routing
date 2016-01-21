@@ -41,18 +41,23 @@ class Item implements Jsonable
         $this->enabled = (bool)$enabled;
     }
 
+    public function toArray()
+    {
+        return [
+            'code' => $this->code,
+            'name' => $this->name,
+            'quantity' => $this->quantity,
+            'enabled' => $this->enabled,
+        ];
+    }
+
     /**
      * @param int $options
      * @return string
      */
     public function toJson($options = 0)
     {
-        return json_encode([
-            'Code' => $this->code,
-            'Name' => $this->name,
-            'Quantity' => $this->quantity,
-            'Enabled' => $this->enabled,
-        ]);
+        return json_encode($this->toArray());
     }
 
     public function __toString()

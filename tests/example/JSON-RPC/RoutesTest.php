@@ -91,11 +91,10 @@ class RoutesTest extends \PHPUnit_Framework_TestCase
             $contents = $response->getBody()->getContents();
 
         } catch (ClientException $e) {
-            // @note will fail
-            // @fixme treat this case
-            static::assertEquals('???', $e->getMessage() . ': ' . $e->getResponse()->getBody()->getContents());
+            static::assertEquals(404, $e->getResponse()->getStatusCode());
+            $contents = $e->getResponse()->getBody()->getContents();
         }
 
-        static::assertNull($contents);
+        static::assertEquals('Page not found', $contents);
     }
 }

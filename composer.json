@@ -15,8 +15,9 @@
         "illuminate/routing": "5.0.*"
     },
     "require-dev": {
-      "mockery/mockery": "0.9.*",
-      "phpunit/phpunit": "*"
+        "mockery/mockery": "0.9.*",
+        "phpunit/phpunit": "*",
+        "guzzlehttp/guzzle": "*"
     },
     "autoload": {
         "psr-4": {

@@ -71,7 +71,7 @@ class App
 
     protected function initRoutes()
     {
-        require 'resources/routes.php';
+        require __DIR__ . '/resources/routes.php';
     }
 
     /**
@@ -97,7 +97,9 @@ class App
             exit();
         }
 
-        $response->sendHeaders();
+        // @todo re-enable or delete todo and commented line.
+        // had an issue with php-fpm: "FastCGI: comm with server "/php-fpm" aborted: error parsing headers: duplicate header 'Content-Type'"
+        // $response->sendHeaders();
         $response->send();
 
         return $response;

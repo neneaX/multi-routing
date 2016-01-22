@@ -7,6 +7,16 @@
             "name": "Andrei Pirjoleanu",
             "email": "andreipirjoleanu@gmail.com",
             "role": "Developer"
+        },
+        {
+            "name": "Bogdan Anton",
+            "email": "contact@bogdananton.ro",
+            "role": "Developer"
+        },
+        {
+            "name": "Teodor Popa",
+            "email": "popa.teodor@gmail.com",
+            "role": "Developer"
         }
     ],
     "require": {

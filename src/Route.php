@@ -1,7 +1,9 @@
 <?php
 namespace MultiRouting;
 
-use \Illuminate\Routing\Route as BaseRoute;
+use Illuminate\Container\Container;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route as BaseRoute;
 
 class Route extends BaseRoute
 {
@@ -29,5 +31,11 @@ class Route extends BaseRoute
             $this->domain(),
             $this->getUri()
         ]);
+    }
+
+    public function run(Request $request)
+    {
+        $this->container = $this->container ?: Container::getInstance();
+        return parent::run($request);
     }
 }

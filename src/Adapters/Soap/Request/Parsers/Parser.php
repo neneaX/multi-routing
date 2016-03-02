@@ -8,7 +8,6 @@ use \DOMDocument as DOMDocument;
 
 class Parser implements ParserInterface
 {
-
     /**
      * @var array
      */
@@ -172,13 +171,57 @@ class Parser implements ParserInterface
                 foreach ($methodNode->childNodes as $paramNode) {
                     if ($paramNode && $paramNode instanceof \DOMElement) {
                         $parameterNameParts = explode(':', $paramNode->nodeName);
-                        $params[end($parameterNameParts)] = $paramNode->nodeValue;
+                        $params[end($parameterNameParts)] = $this->parseNode($paramNode);
                     }
                 }
             }
         }
+
         return $params;
     }
+
+    protected function parseNode(\DOMElement $node)
+    {
+        // @todo improve array type check
+        $isArray = false;
+        /** @var \DOMAttr $attribute */
+        foreach ($node->attributes as $attribute) {
+            $isArray = $isArray || ($attribute->name == 'arrayType');
+        }
+
+        // parse content
+        if (null !== $node->childNodes && 0 !== $node->childNodes->length) {
+            $response = [];
+            $count = 0;
+
+            foreach ($node->childNodes as $childNode) {
+                if ($childNode instanceof \DOMElement) {
+                    $key = $isArray ? $count++ : $childNode->nodeName;
+
+                    if ($childNode->attributes->getNamedItem('nil') instanceof \DOMAttr) {
+                        if ($childNode->attributes->getNamedItem('nil')->nodeValue == true) {
+                            $response[$key] = null;
+                            continue;
+                        }
+                    }
+
+                    $content = $this->parseNode($childNode);
+                    $response[$key] = $content;
+
+                } else {
+                    return $node->nodeValue;
+                }
+            }
+
+            return $isArray ? $response : (object)$response;
+
+        } else {
+            return $node->nodeValue;
+        }
+
+        return null;
+    }
+
     /**
      * Get a specific parameter from the called method (from the request)
      *

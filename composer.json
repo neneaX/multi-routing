@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/events": "v5.2.21",
+        "illuminate/events": "v5.2.7",
         "illuminate/routing": "v5.2.21"
     },
     "require-dev": {

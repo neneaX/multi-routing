@@ -147,7 +147,6 @@ class Route extends BaseRoute
         }
 
         try {
-
             $soapHandler = $this->container->make(
                 'MultiRouting\\Adapters\\Soap\\Request\\Handlers\\Handler',
                 [
@@ -156,14 +155,14 @@ class Route extends BaseRoute
                     $parameters
                 ]
             );
-
             $soapServer->setObject($soapHandler);
             $soapServer->handle();
         } catch (\Exception $e) {
-            $soapServer->fault($e->getCode(), $e->getMessage());
+            $soapServer->fault(
+                $e->getCode(),
+                $e->getMessage()
+            );
         }
-
-        exit();
     }
 
     /**

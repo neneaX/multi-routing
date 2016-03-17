@@ -21,8 +21,9 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/events": "v5.2.7",
-        "illuminate/routing": "v5.2.21"
+        "illuminate/events": "5.0.*",
+        "illuminate/routing": "5.0.*",
+        "xqddd/notifications": "0.*"
     },
     "require-dev": {
         "mockery/mockery": "0.9.*",

@@ -2,8 +2,7 @@
 namespace MultiRouting\Adapters\JsonRpc\Request\Parsers;
 
 use MultiRouting\Adapters\JsonRpc\Request\Content;
-use MultiRouting\Adapters\JsonRpc\Response\Errors\InvalidRequest;
-use MultiRouting\Adapters\JsonRpc\Response\Errors\ParseError;
+use MultiRouting\Adapters\JsonRpc\Response\ErrorFactory;
 
 class Parser
 {
@@ -139,14 +138,14 @@ class Parser
         try {
             $this->validateContent();
         } catch (\Exception $e) {
-            $this->errors[0] = new ParseError();
+            $this->errors[0] = ErrorFactory::parseError();
             return;
         }
 
         try {
             $this->validateVersion();
         } catch (\Exception $e) {
-            $this->errors[1] = new InvalidRequest();
+            $this->errors[1] = ErrorFactory::invalidRequest();
         }
 
         try {
@@ -157,7 +156,7 @@ class Parser
                 $this->validateIdExists();
 
                 // If validating passes, the id is set but invalid
-                $this->errors[1] = new InvalidRequest();
+                $this->errors[1] = ErrorFactory::invalidRequest();
             } catch (\Exception $e) {
                 // The id is not set, the request is a Notification
             }
@@ -166,7 +165,7 @@ class Parser
         try {
             $this->validateMethod();
         } catch (\Exception $e) {
-            $this->errors[1] = new InvalidRequest();
+            $this->errors[1] = ErrorFactory::invalidRequest();
         }
     }
 

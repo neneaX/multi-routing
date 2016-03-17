@@ -6,13 +6,15 @@ use Illuminate\Routing\Matching\HostValidator;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
+use MultiRouting\Adapters\JsonRpc\Exceptions\ApplicationException;
 use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\JsonRpc\Exceptions\NotificationException;
 use MultiRouting\Adapters\JsonRpc\Matching\IntentValidator;
 use MultiRouting\Adapters\JsonRpc\Request\Interpreters\Interpreter;
+use MultiRouting\Adapters\JsonRpc\Response\Response;
+use MultiRouting\Adapters\JsonRpc\Response\ErrorFactory as ResponseErrorFactory;
 use MultiRouting\Adapters\JsonRpc\Response\Content as ResponseContent;
 use MultiRouting\Adapters\JsonRpc\Response\ContentFactory as ResponseContentFactory;
-use MultiRouting\Adapters\JsonRpc\Response\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Route extends BaseRoute
@@ -95,9 +97,6 @@ class Route extends BaseRoute
             throw new NotFoundHttpException;
         }
 
-        /** @var ResponseContentFactory $contentFactory */
-        $contentFactory = $this->container->make('MultiRouting\\Adapters\\JsonRpc\\Response\\ContentFactory');
-
         /**
          * JsonRpc HTTP request interpreter
          */
@@ -121,14 +120,23 @@ class Route extends BaseRoute
         }
 
         try {
-            $controllerResponse = call_user_func_array([$instance, $method], $parameters);
-            $responseContent = $contentFactory->buildFromResult($controllerResponse, $requestId);
-            /**
-             * The controller can return either a mixed value (return) or an Error (defined as \GenericApplicationImplementation\Error\ErrorInterface
-             * @todo check if the responseContent is an \GenericApplicationImplementation\Error\ErrorInterface and use buildFromError instead of buildFromResult
-             */
+            $controllerResponse = call_user_func_array(
+                [
+                    $instance,
+                    $method
+                ],
+                $parameters
+            );
+            $responseContent = ResponseContent::buildResult($requestId, $controllerResponse);
+//
+//            $error = ResponseErrorFactory::applicationError(
+//                $e->getCode(),
+//                $e->getMessage()
+//            );
+//            $responseContent = ResponseContent::buildError($requestId, $error);
         } catch (\Exception $e) {
-            $responseContent = $contentFactory->buildFromException($e, $requestId);
+            $error = ResponseErrorFactory::serverError();
+            $responseContent = ResponseContent::buildError($requestId, $error);
         }
 
         /**

@@ -135,27 +135,29 @@ class Route extends BaseRoute
             $this->parametersWithoutNulls(), $class, $method
         );
 
-        if ( !method_exists($instance = $this->container->make($class), $method))
-        {
-            throw new NotFoundHttpException;
-        }
-
         try {
             $soapServer = new \SoapServer($this->getWsdlPath());
         } catch (\SoapFault $e) {
             throw new \SoapFault(500, 'The application encountered an unexpected error.');
         }
 
+        if ( !method_exists($instance = $this->container->make($class), $method)) {
+            throw new \SoapFault(500, 'The application encountered an unexpected error.');
+        }
+
         try {
-            $soapHandler = $this->container->make(
-                'MultiRouting\\Adapters\\Soap\\Request\\Handlers\\Handler',
-                [
-                    $instance,
-                    $method,
-                    $parameters
-                ]
-            );
-            $soapServer->setObject($soapHandler);
+            $proxyAlias = 'multirouting.adapters.soap.request.proxy';
+            if ($this->container->bound($proxyAlias)) {
+                $instance = $this->container->make(
+                    $proxyAlias,
+                    [
+                        $instance,
+                        $method,
+                        $parameters
+                    ]
+                );
+            }
+            $soapServer->setObject($instance);
             $soapServer->handle();
         } catch (\Exception $e) {
             $soapServer->fault(

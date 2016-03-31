@@ -6,15 +6,12 @@ use Illuminate\Routing\Matching\HostValidator;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
-use MultiRouting\Adapters\JsonRpc\Exceptions\ApplicationException;
 use MultiRouting\Route as BaseRoute;
-use MultiRouting\Adapters\JsonRpc\Exceptions\NotificationException;
 use MultiRouting\Adapters\JsonRpc\Matching\IntentValidator;
 use MultiRouting\Adapters\JsonRpc\Request\Interpreters\Interpreter;
 use MultiRouting\Adapters\JsonRpc\Response\Response;
 use MultiRouting\Adapters\JsonRpc\Response\ErrorFactory as ResponseErrorFactory;
 use MultiRouting\Adapters\JsonRpc\Response\Content as ResponseContent;
-use MultiRouting\Adapters\JsonRpc\Response\ContentFactory as ResponseContentFactory;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Route extends BaseRoute
@@ -92,11 +89,6 @@ class Route extends BaseRoute
             $this->parametersWithoutNulls(), $class, $method
         );
 
-        if ( ! method_exists($instance = $this->container->make($class), $method))
-        {
-            throw new NotFoundHttpException;
-        }
-
         /**
          * JsonRpc HTTP request interpreter
          */
@@ -106,8 +98,17 @@ class Route extends BaseRoute
          * JsonRpc request id
          */
         $requestId = $interpreter->getId();
+
+        if ( ! method_exists($instance = $this->container->make($class), $method))
+        {
+            $error = ResponseErrorFactory::methodNotFound();
+            $responseContent = ResponseContent::buildErrorContent($requestId, $error);
+
+            return new Response($responseContent);
+        }
+
         if ($interpreter->hasErrors()) {
-            $responseContent = ResponseContent::buildError(
+            $responseContent = ResponseContent::buildErrorContent(
                 $requestId,
                 $interpreter->getFirstError()
             );
@@ -115,8 +116,31 @@ class Route extends BaseRoute
         }
 
         if (null === $requestId) {
-            // The JSON-RPC request is a notification
-            throw new NotificationException;
+            /**
+             * The JSON-RPC request is a notification
+             * Send an empty response
+             *
+             * @see http://www.jsonrpc.org/specification#notification
+             */
+            return new Response();
+        }
+
+        try {
+            if ($this->container->bound('multirouting.adapters.jsonrpc.request.proxy')) {
+                $instance = $this->container->make(
+                    'multirouting.adapters.jsonrpc.request.handler',
+                    [
+                        $instance,
+                        $method,
+                        $parameters
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            $error = ResponseErrorFactory::serverError();
+            $responseContent = ResponseContent::buildErrorContent($requestId, $error);
+
+            return new Response($responseContent);
         }
 
         try {
@@ -127,16 +151,13 @@ class Route extends BaseRoute
                 ],
                 $parameters
             );
-            $responseContent = ResponseContent::buildResult($requestId, $controllerResponse);
-//
-//            $error = ResponseErrorFactory::applicationError(
-//                $e->getCode(),
-//                $e->getMessage()
-//            );
-//            $responseContent = ResponseContent::buildError($requestId, $error);
+            $responseContent = ResponseContent::buildSuccessContent($requestId, $controllerResponse);
         } catch (\Exception $e) {
-            $error = ResponseErrorFactory::serverError();
-            $responseContent = ResponseContent::buildError($requestId, $error);
+            $error = ResponseErrorFactory::applicationError(
+                $e->getCode(),
+                $e->getMessage()
+            );
+            $responseContent = ResponseContent::buildErrorContent($requestId, $error);
         }
 
         /**

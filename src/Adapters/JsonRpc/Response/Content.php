@@ -56,7 +56,7 @@ class Content implements Jsonable
      * @param Error $error
      * @return Content
      */
-    public static function buildError($id, Error $error)
+    public static function buildErrorContent($id, Error $error)
     {
         $response = new self();
         $response->id = $id;
@@ -70,7 +70,7 @@ class Content implements Jsonable
      * @param mixed $result
      * @return Content
      */
-    public static function buildResult($id, $result)
+    public static function buildSuccessContent($id, $result)
     {
         $response = new self();
         $response->id = $id;

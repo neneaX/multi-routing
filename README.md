@@ -4,3 +4,8 @@
 [![Code Climate](https://codeclimate.com/github/neneaX/multi-routing.png)](https://codeclimate.com/github/neneaX/multi-routing)
 [![Total Downloads](https://poser.pugx.org/neneax/multi-routing/downloads)](https://packagist.org/packages/neneax/multi-routing)
 [![License](https://poser.pugx.org/neneax/multi-routing/license)](https://packagist.org/packages/neneax/multi-routing)
+
+
+Request Proxy aliases (multirouting.adapters.[adapterName].request.proxy):
+ - soap: multirouting.adapters.soap.request.proxy
+ - jsonrpc: multirouting.adapters.jsonrpc.request.proxy

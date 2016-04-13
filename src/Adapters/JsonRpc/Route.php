@@ -126,9 +126,10 @@ class Route extends BaseRoute
         }
 
         try {
-            if ($this->container->bound('multirouting.adapters.jsonrpc.request.proxy')) {
+            $proxyAlias = 'multirouting.adapters.jsonrpc.request.proxy';
+            if ($this->container->bound($proxyAlias)) {
                 $instance = $this->container->make(
-                    'multirouting.adapters.jsonrpc.request.handler',
+                    $proxyAlias,
                     [
                         $instance,
                         $method,

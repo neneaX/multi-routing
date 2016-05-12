@@ -132,17 +132,24 @@ class Route extends BaseRoute
         list($class, $method) = explode('@', $this->action['uses']);
 
         $parameters = $this->resolveClassMethodDependencies(
-            $this->parametersWithoutNulls(), $class, $method
+            $this->parameters(), $class, $method
         );
 
+        $options = [];
+
+        $optionsAlias = 'multirouting.adapters.soap.server.options';
+        if ($this->container->bound($optionsAlias)) {
+            $options = $this->container->make($optionsAlias);
+        }
+
         try {
-            $soapServer = new \SoapServer($this->getWsdlPath());
+            $soapServer = new \SoapServer($this->getWsdlPath(), $options);
         } catch (\SoapFault $e) {
-            throw new \SoapFault(500, 'The application encountered an unexpected error.');
+            throw new \SoapFault('500', 'The application encountered an unexpected error.');
         }
 
         if ( !method_exists($instance = $this->container->make($class), $method)) {
-            throw new \SoapFault(500, 'The application encountered an unexpected error.');
+            $soapServer->fault('500', 'The application encountered an unexpected error.');
         }
 
         try {

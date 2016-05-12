@@ -21,7 +21,7 @@ class Interpreter implements InterpreterInterface
     protected $parser;
 
     /**
-     * RpcInterpreter constructor.
+     * Interpreter constructor.
      *
      * @param Request $request
      * @param SimpleXMLElement $wsdl

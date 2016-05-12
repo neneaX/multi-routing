@@ -86,7 +86,7 @@ class Route extends BaseRoute
         list($class, $method) = explode('@', $this->action['uses']);
 
         $parameters = $this->resolveClassMethodDependencies(
-            $this->parametersWithoutNulls(), $class, $method
+            $this->parameters(), $class, $method
         );
 
         /**
@@ -101,7 +101,7 @@ class Route extends BaseRoute
 
         if ( ! method_exists($instance = $this->container->make($class), $method))
         {
-            $error = ResponseErrorFactory::methodNotFound();
+            $error = ResponseErrorFactory::internalError();
             $responseContent = ResponseContent::buildErrorContent($requestId, $error);
 
             return new Response($responseContent);

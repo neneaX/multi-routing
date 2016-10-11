@@ -7,6 +7,8 @@ use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
 use MultiRouting\Adapters\Soap\Request\Interpreters\Interpreter;
+use MultiRouting\Adapters\Soap\Response\Response;
+use MultiRouting\Request\Proxy\ProxyInterface;
 use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\Soap\Matching\IntentValidator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -152,26 +154,40 @@ class Route extends BaseRoute
             $soapServer->fault('500', 'The application encountered an unexpected error.');
         }
 
+        ob_start();
         try {
             $proxyAlias = 'multirouting.adapters.soap.request.proxy';
             if ($this->container->bound($proxyAlias)) {
-                $instance = $this->container->make(
-                    $proxyAlias,
-                    [
-                        $instance,
-                        $method,
-                        $parameters
-                    ]
-                );
+                /** @var ProxyInterface $proxyInstance */
+                $proxyInstance = $this->container->make($proxyAlias);
+
+                $proxyInstance->setMatchedInstance($instance);
+                $proxyInstance->setMatchedMethod($method);
+                $proxyInstance->setMatchedParameters($parameters);
+
+                $instance = $proxyInstance;
             }
             $soapServer->setObject($instance);
             $soapServer->handle();
+            $statusCode = 200;
         } catch (\Exception $e) {
             $soapServer->fault(
                 $e->getCode(),
                 $e->getMessage()
             );
+            $statusCode = 500;
         }
+        $responseContent = ob_get_contents();
+        $headers = headers_list();
+        ob_end_clean();
+
+        $responseHeaders = [];
+        foreach ($headers as $header) {
+            list($key, $value) = explode(':', $header, 2);
+            $responseHeaders[trim($key)] = trim($value);
+        }
+
+        return new Response($responseContent, $statusCode, $responseHeaders);
     }
 
     /**

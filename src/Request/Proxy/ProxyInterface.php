@@ -5,12 +5,19 @@ interface ProxyInterface
 {
 
     /**
-     * Proxy constructor.
      * @param object $matchedInstance
+     */
+    public function setMatchedInstance($matchedInstance);
+
+    /**
      * @param string $matchedMethod
+     */
+    public function setMatchedMethod($matchedMethod);
+
+    /**
      * @param array $matchedParameters
      */
-    public function __construct($matchedInstance, $matchedMethod, array $matchedParameters = []);
+    public function setMatchedParameters(array $matchedParameters = []);
 
     /**
      * @param string $requestedMethod

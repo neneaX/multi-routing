@@ -6,6 +6,7 @@ use Illuminate\Routing\Matching\HostValidator;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
+use MultiRouting\Request\Proxy\ProxyInterface;
 use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\JsonRpc\Matching\IntentValidator;
 use MultiRouting\Adapters\JsonRpc\Request\Interpreters\Interpreter;
@@ -128,14 +129,14 @@ class Route extends BaseRoute
         try {
             $proxyAlias = 'multirouting.adapters.jsonrpc.request.proxy';
             if ($this->container->bound($proxyAlias)) {
-                $instance = $this->container->make(
-                    $proxyAlias,
-                    [
-                        $instance,
-                        $method,
-                        $parameters
-                    ]
-                );
+                /** @var ProxyInterface $proxyInstance */
+                $proxyInstance = $this->container->make($proxyAlias);
+
+                $proxyInstance->setMatchedInstance($instance);
+                $proxyInstance->setMatchedMethod($method);
+                $proxyInstance->setMatchedParameters($parameters);
+
+                $instance = $proxyInstance;
             }
         } catch (\Exception $e) {
             $error = ResponseErrorFactory::serverError();
@@ -164,7 +165,6 @@ class Route extends BaseRoute
         /**
          * @todo check if the response returned from the controller needs additional headers to be set on the response
          */
-
         return new Response($responseContent);
     }
 

@@ -50,6 +50,17 @@ class Route extends BaseRoute
      */
     public function getWsdl()
     {
+        if ($this->wsdl instanceof \SimpleXMLElement) {
+            return $this->wsdl;
+        }
+
+        $wsdl = simplexml_load_file($this->wsdlPath);
+        if (false !== $wsdl) {
+            $this->wsdl = $wsdl;
+        } else {
+            // @todo throw exception? destroy everything? set an error? die? exit?
+        }
+
         return $this->wsdl;
     }
 
@@ -58,17 +69,7 @@ class Route extends BaseRoute
      */
     public function setWsdl($wsdlPath)
     {
-       if (file_exists($wsdlPath)) {
-           $wsdl = simplexml_load_file($wsdlPath);
-           if (false !== $wsdl) {
-               $this->wsdlPath = $wsdlPath;
-               $this->wsdl = $wsdl;
-           } else {
-               // @todo throw exception? destroy everything? set an error? die? exit?
-           }
-       } else {
-           // @todo throw exception? destroy everything? set an error? die? exit?
-       }
+        $this->wsdlPath = $wsdlPath;
     }
 
     /**

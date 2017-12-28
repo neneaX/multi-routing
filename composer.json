@@ -1,21 +1,12 @@
 {
     "name": "neneax/multi-routing",
     "description": "A simple package used for routing and dispatching intents to controllers, by using different protocols/serializations.",
+    "version": "dev-master",
     "license": "MIT",
     "authors": [
         {
             "name": "Andrei Pirjoleanu",
             "email": "andreipirjoleanu@gmail.com",
-            "role": "Developer"
-        },
-        {
-            "name": "Bogdan Anton",
-            "email": "contact@bogdananton.ro",
-            "role": "Developer"
-        },
-        {
-            "name": "Teodor Popa",
-            "email": "popa.teodor@gmail.com",
             "role": "Developer"
         }
     ],

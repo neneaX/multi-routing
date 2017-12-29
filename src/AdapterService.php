@@ -104,7 +104,7 @@ class AdapterService
             $this->bindAdapter($name);
         }
 
-        return $this->container->make($alias, [$router]);
+        return $this->container->makeWith($alias, [$router]);
     }
 
     /**

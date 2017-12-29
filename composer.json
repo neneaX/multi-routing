@@ -11,9 +11,9 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0",
-        "illuminate/events": "5.0.*",
-        "illuminate/routing": "5.0.*",
+        "php": ">=5.6.0",
+        "illuminate/events": "5.4.*",
+        "illuminate/routing": "5.4.*",
         "xqddd/notifications": "0.*"
     },
     "require-dev": {

@@ -1,7 +1,7 @@
 {
     "name": "neneax/multi-routing",
     "description": "A simple package used for routing and dispatching intents to controllers, by using different protocols/serializations.",
-    "version": "dev-master",
+    "version": "dev-update",
     "license": "MIT",
     "authors": [
         {

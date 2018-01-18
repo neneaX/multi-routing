@@ -180,13 +180,30 @@ class Parser implements ParserInterface
         return $params;
     }
 
+    /**
+     * @param \DOMElement $node
+     *
+     * @return array|null|object|string
+     */
     protected function parseNode(\DOMElement $node)
     {
         // @todo improve array type check
-        $isArray = false;
+        $isArray = $node->hasAttribute('arrayType');
+        $hasHref = $node->hasAttribute('href');
         /** @var \DOMAttr $attribute */
         foreach ($node->attributes as $attribute) {
+            // check when namespaces are used and hasAttribute includes namespace that won't match
             $isArray = $isArray || ($attribute->name == 'arrayType');
+            $hasHref = $hasHref || ($attribute->name == 'href');
+        }
+
+        if (true === $hasHref) {
+            foreach ($this->rawContent->childNodes as $childNode) {
+                $nodeValue = $this->getNodeValueById($node->getAttribute('href'), $childNode);
+                if (!empty($nodeValue)) {
+                    return $nodeValue;
+                }
+            }
         }
 
         // parse content
@@ -217,6 +234,38 @@ class Parser implements ParserInterface
 
         } else {
             return $node->nodeValue;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string      $id
+     * @param \DOMElement $node
+     *
+     * @return null|string
+     */
+    private function getNodeValueById($id, \DOMElement $node)
+    {
+        if (false === ($node->childNodes instanceof \DOMNodeList)) {
+            return null;
+        }
+
+        /** @var \DOMElement $subNode */
+        foreach ($node->childNodes as $subNode) {
+            if (false === ($subNode instanceof \DOMElement)) {
+                continue;
+            }
+            if (
+                $subNode->hasAttribute('id')
+                && ('#' . ($subNode->getAttribute('id')) == $id)
+            ) {
+                return $this->parseNode($subNode);
+            }
+            $nodeValue = $this->getNodeValueById($id, $subNode);
+            if (!empty($nodeValue)) {
+                return $nodeValue;
+            }
         }
 
         return null;

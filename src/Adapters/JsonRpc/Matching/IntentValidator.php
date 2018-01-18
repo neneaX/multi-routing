@@ -15,6 +15,7 @@ class IntentValidator implements ValidatorInterface
      *
      * @param BaseRoute $route
      * @param Request $request
+     *
      * @return bool
      */
     public function matches(BaseRoute $route, Request $request)
@@ -22,6 +23,6 @@ class IntentValidator implements ValidatorInterface
         if (! $route instanceof Route) {
             return false;
         }
-        return $route->getIntent() === (new Interpreter($request))->getIntent();
+        return $route->getIntent() === ($route->getInterpreter($request)->getIntent());
     }
 }

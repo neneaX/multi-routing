@@ -23,6 +23,6 @@ class IntentValidator implements ValidatorInterface
             return false;
         }
 
-        return $route->getIntent() === (new Interpreter($request, $route->getWsdl()))->getIntent();
+        return $route->getIntent() === $route->getInterpreter($request)->getIntent();
     }
 }

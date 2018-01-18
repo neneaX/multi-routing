@@ -6,6 +6,10 @@ use Illuminate\Routing\Matching\HostValidator;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
+use MultiRouting\Request\Interpreters\InterpreterInterface;
+use MultiRouting\Request\Interpreters\InterpreterMap;
+use MultiRouting\Request\Interpreters\InterpreterMapInterface;
+use MultiRouting\Request\Interpreters\InterpreterNotFound;
 use MultiRouting\Request\Proxy\ProxyInterface;
 use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\JsonRpc\Matching\IntentValidator;
@@ -24,6 +28,58 @@ class Route extends BaseRoute
      * @var string
      */
     protected $intent;
+
+    /**
+     * @var InterpreterMapInterface
+     */
+    private $interpreterMap;
+
+    /**
+     * @return bool
+     */
+    private function checkInterpreterMap()
+    {
+        return ($this->interpreterMap instanceof InterpreterMapInterface);
+    }
+
+    /**
+     *
+     */
+    private function setInterpreterMap()
+    {
+        $this->interpreterMap = new InterpreterMap();
+    }
+
+    /**
+     * @return InterpreterMapInterface
+     */
+    private function loadInterpreterMap()
+    {
+        if (false === $this->checkInterpreterMap()) {
+            $this->setInterpreterMap();
+        }
+
+        return $this->interpreterMap;
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return InterpreterInterface
+     */
+    public function getInterpreter(Request $request)
+    {
+        $hash = Interpreter::computeHash($request);
+
+        try {
+            $interpreter = $this->loadInterpreterMap()->getInterpreterByHash($hash);
+        } catch (InterpreterNotFound $e) {
+            $interpreter = new Interpreter($request);
+            $this->loadInterpreterMap()->addInterpreter($interpreter);
+        }
+
+        return $interpreter;
+    }
 
     /**
      * @return string
@@ -68,7 +124,7 @@ class Route extends BaseRoute
      */
     public function bindParameters(Request $request)
     {
-        $requestInterpreter = new Interpreter($request);
+        $requestInterpreter = $this->getInterpreter($request);
 
         $params = $requestInterpreter->getParameters();
 
@@ -92,8 +148,10 @@ class Route extends BaseRoute
 
         /**
          * JsonRpc HTTP request interpreter
+         *
+         * @var Interpreter $interpreter
          */
-        $interpreter = new Interpreter($request);
+        $interpreter = $this->getInterpreter($request);
 
         /**
          * JsonRpc request id

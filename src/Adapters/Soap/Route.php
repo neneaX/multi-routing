@@ -8,6 +8,10 @@ use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
 use MultiRouting\Adapters\Soap\Request\Interpreters\Interpreter;
 use MultiRouting\Adapters\Soap\Response\Response;
+use MultiRouting\Request\Interpreters\InterpreterInterface;
+use MultiRouting\Request\Interpreters\InterpreterMap;
+use MultiRouting\Request\Interpreters\InterpreterMapInterface;
+use MultiRouting\Request\Interpreters\InterpreterNotFound;
 use MultiRouting\Request\Proxy\ProxyInterface;
 use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\Soap\Matching\IntentValidator;
@@ -38,30 +42,63 @@ class Route extends BaseRoute
     protected $intent;
 
     /**
+     * @var InterpreterMapInterface
+     */
+    private $interpreterMap;
+
+    /**
+     * @return bool
+     */
+    private function checkInterpreterMap()
+    {
+        return ($this->interpreterMap instanceof InterpreterMapInterface);
+    }
+
+    /**
+     *
+     */
+    private function setInterpreterMap()
+    {
+        $this->interpreterMap = new InterpreterMap();
+    }
+
+    /**
+     * @return InterpreterMapInterface
+     */
+    private function loadInterpreterMap()
+    {
+        if (false === $this->checkInterpreterMap()) {
+            $this->setInterpreterMap();
+        }
+
+        return $this->interpreterMap;
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return InterpreterInterface
+     */
+    public function getInterpreter(Request $request)
+    {
+        $hash = Interpreter::computeHash($request, $this->getWsdlPath());
+
+        try {
+            $interpreter = $this->loadInterpreterMap()->getInterpreterByHash($hash);
+        } catch (InterpreterNotFound $e) {
+            $interpreter = new Interpreter($request, $this->getWsdlPath());
+            $this->loadInterpreterMap()->addInterpreter($interpreter);
+        }
+
+        return $interpreter;
+    }
+
+    /**
      * @return string
      */
     public function getWsdlPath()
     {
         return $this->wsdlPath;
-    }
-
-    /**
-     * @return \SimpleXMLElement
-     */
-    public function getWsdl()
-    {
-        if ($this->wsdl instanceof \SimpleXMLElement) {
-            return $this->wsdl;
-        }
-
-        $wsdl = simplexml_load_file($this->wsdlPath);
-        if (false !== $wsdl) {
-            $this->wsdl = $wsdl;
-        } else {
-            // @todo throw exception? destroy everything? set an error? die? exit?
-        }
-
-        return $this->wsdl;
     }
 
     /**
@@ -115,7 +152,7 @@ class Route extends BaseRoute
      */
     public function bindParameters(Request $request)
     {
-        $requestInterpreter = new Interpreter($request, $this->getWsdl());
+        $requestInterpreter = $this->getInterpreter($request);
 
         $params = $requestInterpreter->getParameters();
 

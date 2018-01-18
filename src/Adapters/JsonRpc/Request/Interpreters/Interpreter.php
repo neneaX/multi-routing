@@ -3,13 +3,17 @@ namespace MultiRouting\Adapters\JsonRpc\Request\Interpreters;
 
 use Illuminate\Http\Request;
 use MultiRouting\Adapters\JsonRpc\Request\Parsers\Parser;
+use MultiRouting\Adapters\JsonRpc\Response\Error;
 use MultiRouting\Request\Interpreters\InterpreterInterface;
 
+/**
+ * Class Interpreter
+ * @package MultiRouting\Adapters\JsonRpc\Request\Interpreters
+ */
 class Interpreter implements InterpreterInterface
 {
 
     /**
-     *
      * @var $request
      */
     protected $request;
@@ -20,6 +24,31 @@ class Interpreter implements InterpreterInterface
     protected $parser;
 
     /**
+     * @var string
+     */
+    private $hash;
+
+    /**
+     * @param Request $request
+     *
+     * @return string
+     */
+    public static function computeHash(Request $request)
+    {
+        return mhash(MHASH_SHA256, self::computeHashData($request));
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return string
+     */
+    private static function computeHashData(Request $request)
+    {
+        return $request->format('json');
+    }
+
+    /**
      * RpcInterpreter constructor.
      *
      * @param Request $request
@@ -27,7 +56,20 @@ class Interpreter implements InterpreterInterface
     public function __construct(Request $request)
     {
         $this->request = $request;
+        $this->hash = null; //reset hash
         $this->setParser();
+    }
+
+    /**
+     * @return string
+     */
+    public function buildHash()
+    {
+        if (empty($this->hash)) {
+            $this->hash = self::computeHash($this->request);
+        }
+
+        return $this->hash;
     }
 
     public function setParser()
@@ -67,11 +109,17 @@ class Interpreter implements InterpreterInterface
         return $this->getSessionId();
     }
 
+    /**
+     * @return bool
+     */
     public function hasErrors()
     {
         return (null !== $this->parser->getErrors());
     }
 
+    /**
+     * @return null|Error
+     */
     public function getFirstError()
     {
         foreach ($this->parser->getErrors() as $error) {
@@ -80,6 +128,9 @@ class Interpreter implements InterpreterInterface
         return null;
     }
 
+    /**
+     * @return array
+     */
     public function getErrors()
     {
         return $this->parser->getErrors();

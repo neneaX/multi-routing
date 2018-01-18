@@ -162,12 +162,12 @@ class Route extends BaseRoute
     /**
      * Run the route action and return the response.
      *
-     * @param Request $request
      * @return mixed
+     *
      * @throws NotFoundHttpException
      * @throws \SoapFault
      */
-    protected function runController(Request $request)
+    protected function runController()
     {
         list($class, $method) = explode('@', $this->action['uses']);
 

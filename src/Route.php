@@ -1,10 +1,13 @@
 <?php
 namespace MultiRouting;
 
-use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route as BaseRoute;
 
+/**
+ * Class Route
+ * @package MultiRouting
+ */
 class Route extends BaseRoute
 {
 
@@ -33,9 +36,9 @@ class Route extends BaseRoute
         ]);
     }
 
-    public function run(Request $request)
-    {
-        $this->container = $this->container ?: Container::getInstance();
-        return parent::run($request);
-    }
+    /**
+     * @param Request $request
+     */
+    public abstract function prepareRun(Request $request);
+
 }

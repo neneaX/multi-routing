@@ -6,10 +6,7 @@ use Illuminate\Routing\Matching\HostValidator;
 use Illuminate\Routing\Matching\MethodValidator;
 use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
-use MultiRouting\Request\Interpreters\InterpreterInterface;
-use MultiRouting\Request\Interpreters\InterpreterMap;
-use MultiRouting\Request\Interpreters\InterpreterMapInterface;
-use MultiRouting\Request\Interpreters\InterpreterNotFound;
+use MultiRouting\Request\Interpreters\InterpreterTrait;
 use MultiRouting\Request\Proxy\ProxyInterface;
 use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\JsonRpc\Matching\IntentValidator;
@@ -19,8 +16,14 @@ use MultiRouting\Adapters\JsonRpc\Response\ErrorFactory as ResponseErrorFactory;
 use MultiRouting\Adapters\JsonRpc\Response\Content as ResponseContent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * Class Route
+ * @package MultiRouting\Adapters\JsonRpc
+ */
 class Route extends BaseRoute
 {
+
+    use InterpreterTrait;
 
     /**
      * The intent (called method) that the Json RPC route responds to.
@@ -30,55 +33,33 @@ class Route extends BaseRoute
     protected $intent;
 
     /**
-     * @var InterpreterMapInterface
-     */
-    private $interpreterMap;
-
-    /**
-     * @return bool
-     */
-    private function checkInterpreterMap()
-    {
-        return ($this->interpreterMap instanceof InterpreterMapInterface);
-    }
-
-    /**
+     * Bind the current request (in prepareRun()), to make use of the IDs and other meta properties in run()
      *
+     * This is bad for your health
+     * @todo forget about illuminate router and write a proper router (too many breaking changes on minor versions)
+     *
+     * @var Request
      */
-    private function setInterpreterMap()
-    {
-        $this->interpreterMap = new InterpreterMap();
-    }
+    private $currentRequest;
 
     /**
-     * @return InterpreterMapInterface
+     * @param Request $request
+     *
+     * @return Interpreter
      */
-    private function loadInterpreterMap()
+    public function buildInterpreter(Request $request)
     {
-        if (false === $this->checkInterpreterMap()) {
-            $this->setInterpreterMap();
-        }
-
-        return $this->interpreterMap;
+        return new Interpreter($request);
     }
 
     /**
      * @param Request $request
      *
-     * @return InterpreterInterface
+     * @return string
      */
-    public function getInterpreter(Request $request)
+    public function computeHash(Request $request)
     {
-        $hash = Interpreter::computeHash($request);
-
-        try {
-            $interpreter = $this->loadInterpreterMap()->getInterpreterByHash($hash);
-        } catch (InterpreterNotFound $e) {
-            $interpreter = new Interpreter($request);
-            $this->loadInterpreterMap()->addInterpreter($interpreter);
-        }
-
-        return $interpreter;
+        return Interpreter::computeHash($request);
     }
 
     /**
@@ -132,19 +113,35 @@ class Route extends BaseRoute
     }
 
     /**
+     * @param Request $request
+     */
+    public function prepareRun(Request $request)
+    {
+        $this->currentRequest = $request;
+    }
+
+    /**
      * Run the route action and return the response.
      *
-     * @param Request $request
      * @return mixed
      * @throws NotFoundHttpException
      */
-    protected function runController(Request $request)
+    protected function runController()
     {
         list($class, $method) = explode('@', $this->action['uses']);
 
         $parameters = $this->resolveClassMethodDependencies(
             $this->parameters(), $class, $method
         );
+
+        if ($this->currentRequest instanceof Request) {
+            $request = $this->currentRequest;
+        } else {
+            $error = ResponseErrorFactory::serverError();
+            $responseContent = ResponseContent::buildErrorContent(0, $error);
+
+            return new Response($responseContent);
+        }
 
         /**
          * JsonRpc HTTP request interpreter

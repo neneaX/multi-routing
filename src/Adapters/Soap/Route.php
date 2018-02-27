@@ -8,17 +8,20 @@ use Illuminate\Routing\Matching\SchemeValidator;
 use Illuminate\Routing\Matching\UriValidator;
 use MultiRouting\Adapters\Soap\Request\Interpreters\Interpreter;
 use MultiRouting\Adapters\Soap\Response\Response;
-use MultiRouting\Request\Interpreters\InterpreterInterface;
-use MultiRouting\Request\Interpreters\InterpreterMap;
-use MultiRouting\Request\Interpreters\InterpreterMapInterface;
-use MultiRouting\Request\Interpreters\InterpreterNotFound;
+use MultiRouting\Request\Interpreters\InterpreterTrait;
 use MultiRouting\Request\Proxy\ProxyInterface;
 use MultiRouting\Route as BaseRoute;
 use MultiRouting\Adapters\Soap\Matching\IntentValidator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * Class Route
+ * @package MultiRouting\Adapters\Soap
+ */
 class Route extends BaseRoute
 {
+
+    use InterpreterTrait;
 
     /**
      * The path to the server WSDL whom the request is matched against
@@ -42,55 +45,23 @@ class Route extends BaseRoute
     protected $intent;
 
     /**
-     * @var InterpreterMapInterface
-     */
-    private $interpreterMap;
-
-    /**
-     * @return bool
-     */
-    private function checkInterpreterMap()
-    {
-        return ($this->interpreterMap instanceof InterpreterMapInterface);
-    }
-
-    /**
+     * @param Request $request
      *
+     * @return Interpreter
      */
-    private function setInterpreterMap()
+    public function buildInterpreter(Request $request)
     {
-        $this->interpreterMap = new InterpreterMap();
-    }
-
-    /**
-     * @return InterpreterMapInterface
-     */
-    private function loadInterpreterMap()
-    {
-        if (false === $this->checkInterpreterMap()) {
-            $this->setInterpreterMap();
-        }
-
-        return $this->interpreterMap;
+        return new Interpreter($request, $this->getWsdlPath());
     }
 
     /**
      * @param Request $request
      *
-     * @return InterpreterInterface
+     * @return string
      */
-    public function getInterpreter(Request $request)
+    public function computeHash(Request $request)
     {
-        $hash = Interpreter::computeHash($request, $this->getWsdlPath());
-
-        try {
-            $interpreter = $this->loadInterpreterMap()->getInterpreterByHash($hash);
-        } catch (InterpreterNotFound $e) {
-            $interpreter = new Interpreter($request, $this->getWsdlPath());
-            $this->loadInterpreterMap()->addInterpreter($interpreter);
-        }
-
-        return $interpreter;
+        return Interpreter::computeHash($request, $this->getWsdlPath());
     }
 
     /**
@@ -157,6 +128,14 @@ class Route extends BaseRoute
         $params = $requestInterpreter->getParameters();
 
         return $this->parameters = $params;
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function prepareRun(Request $request)
+    {
+        // do nothing
     }
 
     /**

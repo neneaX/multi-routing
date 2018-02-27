@@ -3,6 +3,7 @@ namespace MultiRouting;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Http\Request;
 use MultiRouting\Adapters\AdapterInterface;
 use MultiRouting\Adapters\Main\Adapter as MainAdapter;
 
@@ -38,6 +39,8 @@ class Router extends \Illuminate\Routing\Router
      *
      * @param string $adapterName
      * @param string $class
+     *
+     * @throws \Exception
      */
     public function registerAdapter($adapterName, $class)
     {
@@ -48,6 +51,8 @@ class Router extends \Illuminate\Routing\Router
      * Allow registered routing adapters to be used
      *
      * @param array $adapters
+     *
+     * @throws \Exception
      */
     public function allowAdapters(array $adapters = [])
     {
@@ -102,6 +107,21 @@ class Router extends \Illuminate\Routing\Router
             ->getAdapterInUse()
             ->buildRoute($methods, $uri, $action)
             ->setContainer($this->container);
+    }
+
+    /**
+     * Run the given route within a Stack "onion" instance.
+     *
+     * @param  \Illuminate\Routing\Route  $route
+     * @param  \Illuminate\Http\Request  $request
+     *
+     * @return mixed
+     */
+    protected function runRouteWithinStack(\Illuminate\Routing\Route $route, Request $request)
+    {
+        $route->prepareRun($request);
+
+        return parent::runRouteWithinStack($route, $request);
     }
 
 }
